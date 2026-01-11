@@ -10,22 +10,32 @@ import {
 } from "lucide-react";
 import "./styles.css";
 
+// Hàm bỏ dấu tiếng Việt
+const removeVietnameseTones = (str) => {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase();
+};
+
 const CafePOS = () => {
   const menuData = {
     Cafe: [
-      { name: "Cafe đen (cafe hạt)", price: 25000, hasTemp: true },
+      { name: "Cafe đen ", price: 25000, hasTemp: true },
       { name: "Cafe sữa", price: 27000, hasTemp: true, hasCoffeeOptions: true },
       { name: "Bạc xỉu", price: 28000, hasTemp: true, hasCoffeeOptions: true },
     ],
     "Đặc Biệt": [
-      { name: "Sâm bổ lượng hạt đất", price: 35000 },
-      { name: "Rau má đậu xanh", price: 22000 },
-      { name: "Sữa đậu xanh hạt đất", price: 25000 },
+      { name: "Sâm bổ lượng hạt đát", price: 35000 },
+      { name: "Rau má đậu xanh", price: 25000 },
+      { name: "Sữa đậu xanh hạt đát", price: 25000 },
     ],
     "Giải Nhiệt": [
-      { name: "Sâm la hán quả bổng cúc bí đao h.chia", price: 25000 },
-      { name: "Mủ trôm mủ gòn hạt đất", price: 25000 },
-      { name: "Nha đam hạt chia hạt đất", price: 25000 },
+      { name: "Sâm la hán quả", price: 25000 },
+      { name: "Mủ trôm mủ gòn hạt đát", price: 25000 },
+      { name: "Nha đam hạt chia hạt đát", price: 25000 },
       { name: "Cacao sữa đá", price: 25000 },
       { name: "Socola sữa đá", price: 25000 },
       { name: "Chanh muối cam thảo", price: 25000 },
@@ -35,7 +45,7 @@ const CafePOS = () => {
     ],
     Yaourt: [
       { name: "Yaourt đá", price: 25000 },
-      { name: "Yaourt hạt đất", price: 25000 },
+      { name: "Yaourt hạt đát", price: 25000 },
       { name: "Yaourt dâu", price: 25000 },
       { name: "Yaourt ổi", price: 25000 },
       { name: "Yaourt việt quất", price: 25000 },
@@ -61,7 +71,7 @@ const CafePOS = () => {
         hasPriceOptions: true,
       },
       { name: "Trà ô long sữa", price: 25000 },
-      { name: "Sirô đá bào", price: 23000 },
+      { name: "Sirô đá bào", price: 25000 },
     ],
     "Sữa Tươi": [
       { name: "Sữa tươi cafe", price: 25000 },
@@ -83,9 +93,9 @@ const CafePOS = () => {
       { name: "Trà đào", price: 25000 },
     ],
     "Trà Nóng": [
-      { name: "Trà hoa cúc hạt chia", price: 22000 },
-      { name: "Trà lipton hạt chia", price: 20000 },
-      { name: "Trà ô long", price: 22000 },
+      { name: "Trà hoa cúc hạt chia", price: 25000 },
+      { name: "Trà lipton hạt chia", price: 25000 },
+      { name: "Trà ô long", price: 25000 },
     ],
     "Sinh Tố": [
       { name: "Sinh tố măng cầu", price: 30000 },
@@ -112,7 +122,7 @@ const CafePOS = () => {
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [activeInput, setActiveInput] = useState(null); // "table", "paid", hoặc "search"
   const [tempOptions, setTempOptions] = useState({
-    temperature: "cold",
+    isHot: false,
     lessSweet: false,
     lessIce: false,
     priceOption: "base", // "base" hoặc "max"
@@ -139,7 +149,7 @@ const CafePOS = () => {
   const addToCart = (item) => {
     setSelectedItem(item);
     setTempOptions({
-      temperature: "cold",
+      isHot: false,
       lessSweet: false,
       lessIce: false,
       priceOption: "base",
@@ -259,8 +269,8 @@ const CafePOS = () => {
 
   const getOptionsText = (item) => {
     const opts = [];
-    if (item.hasTemp && item.options?.temperature) {
-      opts.push(item.options.temperature === "hot" ? "Nóng" : "Lạnh");
+    if (item.options?.isHot) {
+      opts.push("Nóng");
     }
     if (
       item.hasCoffeeOptions &&
@@ -311,35 +321,38 @@ const CafePOS = () => {
         <title>Phiếu Bán Hàng</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: 'Courier New', monospace; padding: 50px; max-width: 500px; margin: 0 auto; font-size: 16px; }
-          .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 15px; margin-bottom: 20px; }
-          .title { font-size: 28px; font-weight: bold; margin-bottom: 8px; }
-          .subtitle { font-size: 20px; margin: 8px 0; }
-          .datetime { font-size: 16px; margin-top: 8px; color: #000; font-weight: bold; }
-          .items { margin: 20px 0; }
-          .item-header-row { display: flex; justify-content: space-between; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px; }
-          .item-header-row span:nth-child(1) { flex: 1; max-width: 55%; }
-          .item-header-row span:nth-child(2) { min-width: 60px; text-align: center; }
-          .item-header-row span:nth-child(3) { min-width: 100px; text-align: right; }
-          .item { margin: 15px 0; page-break-inside: avoid; }
-          .item-row { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; align-items: flex-start; font-size: 15px; }
-          .item-row .item-name { flex: 1; max-width: 55%; word-wrap: break-word; line-height: 1.4; }
-          .item-row .item-qty { min-width: 60px; text-align: center; }
-          .item-row .item-price { min-width: 100px; text-align: right; }
-          .item-detail { font-size: 13px; color: #000; font-weight: bold; margin-top: 3px; }
-          .item-options { font-size: 13px; color: #000; font-style: italic; margin-top: 5px; font-weight: bold; }
-          .total-section { margin-top: 20px; border-top: 2px dashed #000; padding-top: 15px; page-break-inside: avoid; }
-          .total-row { display: flex; justify-content: space-between; margin: 8px 0; font-size: 16px; }
+          body { font-family: 'Courier New', monospace; padding: 30px; max-width: 450px; margin: 0 auto; font-size: 13px; }
+          .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 12px; }
+          .title { font-size: 22px; font-weight: bold; margin-bottom: 5px; }
+          .subtitle { font-size: 16px; margin: 5px 0; }
+          .datetime { font-size: 13px; margin-top: 5px; color: #000; font-weight: bold; }
+          .items { margin: 12px 0; }
+          .item-header-row { display: flex; justify-content: space-between; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; font-size: 13px; }
+          .item-header-row span:nth-child(1) { flex: 1; max-width: 60%; }
+          .item-header-row span:nth-child(2) { min-width: 50px; text-align: center; }
+          .item-header-row span:nth-child(3) { min-width: 90px; text-align: right; }
+          .item { margin: 8px 0; page-break-inside: avoid; }
+          .item-row { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 3px; align-items: flex-start; font-size: 13px; }
+          .item-row .item-name { flex: 1; max-width: 60%; word-wrap: break-word; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
+          .item-row .item-qty { min-width: 50px; text-align: center; }
+          .item-row .item-price { min-width: 90px; text-align: right; }
+          .item-options { font-size: 11px; color: #000; font-style: italic; margin-top: 2px; font-weight: bold; }
+          .total-section { margin-top: 12px; border-top: 2px dashed #000; padding-top: 10px; page-break-inside: avoid; }
+          .total-row { display: flex; justify-content: space-between; margin: 5px 0; font-size: 13px; }
           .total-label { font-weight: bold; color: #000; }
           .total-value { font-weight: bold; color: #000; }
-          .grand-total { font-size: 22px; font-weight: bold; margin: 12px 0; }
-          .payment { border-top: 1px dashed #000; margin-top: 12px; padding-top: 12px; }
+          .grand-total { font-size: 18px; font-weight: bold; margin: 8px 0; }
+          .payment { border-top: 1px dashed #000; margin-top: 8px; padding-top: 8px; }
           .payment-label { font-weight: bold; color: #000; }
           .payment-value { font-weight: bold; color: #000; }
-          .footer { text-align: center; margin-top: 25px; border-top: 2px dashed #000; padding-top: 15px; font-size: 16px; page-break-inside: avoid; }
+          .footer { text-align: center; margin-top: 15px; border-top: 2px dashed #000; padding-top: 10px; font-size: 13px; page-break-inside: avoid; }
           @media print { 
-            body { padding: 10px; }
-            @page { margin: 10mm; }
+            body { padding: 5px; max-width: 300px; }
+            @page { margin: 0; size: 80mm auto; }
+            .item { page-break-inside: avoid; }
+            .header { page-break-after: avoid; }
+            .total-section { page-break-inside: avoid; }
+            .footer { page-break-inside: avoid; }
           }
         </style>
       </head>
@@ -376,9 +389,6 @@ const CafePOS = () => {
               item.price * item.quantity
             ).toLocaleString("vi-VN")}đ</span>
           </div>
-          <div class="item-detail">${item.price.toLocaleString("vi-VN")}đ × ${
-        item.quantity
-      }</div>
           ${
             optionsText
               ? `<div class="item-options">Ghi chú: ${optionsText}</div>`
@@ -527,9 +537,9 @@ const CafePOS = () => {
                     const categoryItems = items.filter(
                       (item) =>
                         !searchTerm ||
-                        item.name
-                          .toLowerCase()
-                          .includes(searchTerm.toLowerCase())
+                        removeVietnameseTones(item.name).includes(
+                          removeVietnameseTones(searchTerm)
+                        )
                     );
 
                     if (categoryItems.length === 0) return null;
@@ -572,7 +582,6 @@ const CafePOS = () => {
                       <ShoppingCart size={24} />
                       Phiếu Tính Tiền
                     </h2>
-
                     {cart.length > 0 && (
                       <button onClick={clearCart} className="clear-cart-btn">
                         <Trash2 size={18} />
@@ -599,7 +608,6 @@ const CafePOS = () => {
                                 {getOptionsText(item)}
                               </div>
                             </div>
-
                             <button
                               onClick={() => removeFromCart(item.uniqueId)}
                               className="remove-item-btn"
@@ -607,7 +615,6 @@ const CafePOS = () => {
                               <Trash2 size={14} />
                             </button>
                           </div>
-
                           <div className="cart-item-controls">
                             <div className="quantity-controls">
                               <button
@@ -618,11 +625,9 @@ const CafePOS = () => {
                               >
                                 <Minus size={14} />
                               </button>
-
                               <span className="quantity-display">
                                 {item.quantity}
                               </span>
-
                               <button
                                 onClick={() => updateQuantity(item.uniqueId, 1)}
                                 className="quantity-btn plus"
@@ -630,7 +635,6 @@ const CafePOS = () => {
                                 <Plus size={14} />
                               </button>
                             </div>
-
                             <div className="cart-item-pricing">
                               <div className="cart-item-unit-price">
                                 {formatCurrency(item.price)} × {item.quantity}
@@ -657,7 +661,8 @@ const CafePOS = () => {
                     >
                       <span className="surcharge-icon">💰</span>
                       <span className="surcharge-text">
-                        Phụ thu 20k {surcharge > 0 && "✓"}
+                        Phụ thu 20k
+                        {surcharge > 0 && " ✓"}
                       </span>
                     </button>
                   </div>
@@ -675,7 +680,6 @@ const CafePOS = () => {
                             {cart.reduce((sum, item) => sum + item.quantity, 0)}
                           </span>
                         </div>
-
                         {surcharge > 0 && (
                           <div className="total-row surcharge-row">
                             <span className="label">Phụ thu</span>
@@ -684,7 +688,6 @@ const CafePOS = () => {
                             </span>
                           </div>
                         )}
-
                         <div className="total-row grand-total">
                           <span className="label">TỔNG TIỀN</span>
                           <span className="value">{formatCurrency(total)}</span>
@@ -694,7 +697,6 @@ const CafePOS = () => {
                       {/* Form thanh toán */}
                       <div className="payment-form">
                         <h3 className="payment-form-title">💳 Thanh toán</h3>
-
                         <div className="payment-input-group">
                           <label className="payment-label">Số bàn *</label>
                           <input
@@ -730,12 +732,24 @@ const CafePOS = () => {
                             }`}
                           >
                             <div className="change-row">
-                              <span className="label">
+                              <span
+                                className={`label ${
+                                  paidAmount < total
+                                    ? "insufficient"
+                                    : "sufficient"
+                                }`}
+                              >
                                 {paidAmount < total
                                   ? "⚠️ Còn thiếu"
                                   : "✅ Tiền thối"}
                               </span>
-                              <span className="value">
+                              <span
+                                className={`value ${
+                                  paidAmount < total
+                                    ? "insufficient"
+                                    : "sufficient"
+                                }`}
+                              >
                                 {formatCurrency(Math.abs(changeAmount))}
                               </span>
                             </div>
@@ -778,434 +792,315 @@ const CafePOS = () => {
                 </div>
               </div>
             )}
-
-            {/* Options Modal */}
-            {showOptionsModal && selectedItem && (
-              <div className="options-modal-overlay">
-                <div className="options-modal">
-                  <div className="options-modal-header">
-                    <h3 className="options-modal-title">{selectedItem.name}</h3>
-                    <button
-                      onClick={() => setShowOptionsModal(false)}
-                      className="options-modal-close"
-                    >
-                      <X size={24} />
-                    </button>
-                  </div>
-
-                  <div>
-                    {selectedItem.hasPriceOptions && (
-                      <div className="options-section">
-                        <label className="options-label">Chọn mức giá:</label>
-                        <div className="temperature-buttons">
-                          <button
-                            onClick={() =>
-                              setTempOptions({
-                                ...tempOptions,
-                                priceOption: "base",
-                              })
-                            }
-                            className={`temp-btn ${
-                              tempOptions.priceOption === "base" ? "active" : ""
-                            }`}
-                            style={{
-                              background:
-                                tempOptions.priceOption === "base"
-                                  ? "#10b981"
-                                  : "#d1fae5",
-                              color:
-                                tempOptions.priceOption === "base"
-                                  ? "white"
-                                  : "#065f46",
-                            }}
-                          >
-                            💵 {selectedItem.price.toLocaleString("vi-VN")}đ
-                          </button>
-                          <button
-                            onClick={() =>
-                              setTempOptions({
-                                ...tempOptions,
-                                priceOption: "max",
-                              })
-                            }
-                            className={`temp-btn ${
-                              tempOptions.priceOption === "max" ? "active" : ""
-                            }`}
-                            style={{
-                              background:
-                                tempOptions.priceOption === "max"
-                                  ? "#f59e0b"
-                                  : "#fef3c7",
-                              color:
-                                tempOptions.priceOption === "max"
-                                  ? "white"
-                                  : "#92400e",
-                            }}
-                          >
-                            💰 {selectedItem.maxPrice.toLocaleString("vi-VN")}đ
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedItem.hasTemp && (
-                      <div className="options-section">
-                        <label className="options-label">Nhiệt độ:</label>
-                        <div className="temperature-buttons">
-                          <button
-                            onClick={() =>
-                              setTempOptions({
-                                ...tempOptions,
-                                temperature: "cold",
-                              })
-                            }
-                            className={`temp-btn cold ${
-                              tempOptions.temperature === "cold" ? "active" : ""
-                            }`}
-                          >
-                            ❄️ Lạnh
-                          </button>
-                          <button
-                            onClick={() =>
-                              setTempOptions({
-                                ...tempOptions,
-                                temperature: "hot",
-                              })
-                            }
-                            className={`temp-btn hot ${
-                              tempOptions.temperature === "hot" ? "active" : ""
-                            }`}
-                          >
-                            🔥 Nóng
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedItem.hasCoffeeOptions && (
-                      <div className="options-section">
-                        <label className="options-label">
-                          Mức độ Cafe/Sữa:
-                        </label>
-                        <div
-                          style={{
-                            display: "grid",
-                            gridTemplateColumns: "1fr 1fr",
-                            gap: "0.75rem",
-                          }}
-                        >
-                          <button
-                            onClick={() =>
-                              setTempOptions({
-                                ...tempOptions,
-                                coffeeLevel: "more-milk",
-                              })
-                            }
-                            className={`temp-btn ${
-                              tempOptions.coffeeLevel === "more-milk"
-                                ? "active"
-                                : ""
-                            }`}
-                            style={{
-                              background:
-                                tempOptions.coffeeLevel === "more-milk"
-                                  ? "#8b5cf6"
-                                  : "#ede9fe",
-                              color:
-                                tempOptions.coffeeLevel === "more-milk"
-                                  ? "white"
-                                  : "#6b21a8",
-                              fontSize: "0.875rem",
-                              padding: "0.6rem",
-                            }}
-                          >
-                            🥛 Nhiều sữa
-                          </button>
-                          <button
-                            onClick={() =>
-                              setTempOptions({
-                                ...tempOptions,
-                                coffeeLevel: "less-milk",
-                              })
-                            }
-                            className={`temp-btn ${
-                              tempOptions.coffeeLevel === "less-milk"
-                                ? "active"
-                                : ""
-                            }`}
-                            style={{
-                              background:
-                                tempOptions.coffeeLevel === "less-milk"
-                                  ? "#8b5cf6"
-                                  : "#ede9fe",
-                              color:
-                                tempOptions.coffeeLevel === "less-milk"
-                                  ? "white"
-                                  : "#6b21a8",
-                              fontSize: "0.875rem",
-                              padding: "0.6rem",
-                            }}
-                          >
-                            🥛 Ít sữa
-                          </button>
-                          <button
-                            onClick={() =>
-                              setTempOptions({
-                                ...tempOptions,
-                                coffeeLevel: "more-coffee",
-                              })
-                            }
-                            className={`temp-btn ${
-                              tempOptions.coffeeLevel === "more-coffee"
-                                ? "active"
-                                : ""
-                            }`}
-                            style={{
-                              background:
-                                tempOptions.coffeeLevel === "more-coffee"
-                                  ? "#92400e"
-                                  : "#fef3c7",
-                              color:
-                                tempOptions.coffeeLevel === "more-coffee"
-                                  ? "white"
-                                  : "#92400e",
-                              fontSize: "0.875rem",
-                              padding: "0.6rem",
-                            }}
-                          >
-                            ☕ Cafe nhiều
-                          </button>
-                          <button
-                            onClick={() =>
-                              setTempOptions({
-                                ...tempOptions,
-                                coffeeLevel: "less-coffee",
-                              })
-                            }
-                            className={`temp-btn ${
-                              tempOptions.coffeeLevel === "less-coffee"
-                                ? "active"
-                                : ""
-                            }`}
-                            style={{
-                              background:
-                                tempOptions.coffeeLevel === "less-coffee"
-                                  ? "#92400e"
-                                  : "#fef3c7",
-                              color:
-                                tempOptions.coffeeLevel === "less-coffee"
-                                  ? "white"
-                                  : "#92400e",
-                              fontSize: "0.875rem",
-                              padding: "0.6rem",
-                            }}
-                          >
-                            ☕ Cafe ít
-                          </button>
-                          <button
-                            onClick={() =>
-                              setTempOptions({
-                                ...tempOptions,
-                                coffeeLevel: "normal",
-                              })
-                            }
-                            className={`temp-btn ${
-                              tempOptions.coffeeLevel === "normal"
-                                ? "active"
-                                : ""
-                            }`}
-                            style={{
-                              background:
-                                tempOptions.coffeeLevel === "normal"
-                                  ? "#10b981"
-                                  : "#d1fae5",
-                              color:
-                                tempOptions.coffeeLevel === "normal"
-                                  ? "white"
-                                  : "#065f46",
-                              fontSize: "0.875rem",
-                              padding: "0.6rem",
-                              gridColumn: "1 / -1",
-                            }}
-                          >
-                            ✅ Bình thường
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="options-section">
-                      <label className="options-label">Tùy chọn thêm:</label>
-                      <div className="options-checkboxes">
-                        <label className="checkbox-label">
-                          <input
-                            type="checkbox"
-                            checked={tempOptions.lessSweet}
-                            onChange={(e) =>
-                              setTempOptions({
-                                ...tempOptions,
-                                lessSweet: e.target.checked,
-                              })
-                            }
-                            className="checkbox-input"
-                          />
-                          <span className="checkbox-text">🍬 Ít ngọt</span>
-                        </label>
-                        <label className="checkbox-label">
-                          <input
-                            type="checkbox"
-                            checked={tempOptions.lessIce}
-                            onChange={(e) =>
-                              setTempOptions({
-                                ...tempOptions,
-                                lessIce: e.target.checked,
-                              })
-                            }
-                            className="checkbox-input"
-                          />
-                          <span className="checkbox-text">🧊 Ít đá</span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="modal-actions">
-                    <button
-                      onClick={() => setShowOptionsModal(false)}
-                      className="modal-btn cancel"
-                    >
-                      Hủy
-                    </button>
-                    <button
-                      onClick={confirmAddToCart}
-                      className="modal-btn confirm"
-                    >
-                      Thêm vào giỏ
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Virtual Keyboard */}
-            {showKeyboard && (
-              <div className="keyboard-overlay">
-                <div
-                  className="keyboard-modal"
-                  style={{
-                    maxWidth: activeInput === "search" ? "600px" : "400px",
-                  }}
-                >
-                  <div className="keyboard-header">
-                    <h3 className="keyboard-title">
-                      {activeInput === "table"
-                        ? "Nhập số bàn"
-                        : activeInput === "paid"
-                        ? "Nhập tiền khách đưa"
-                        : "Tìm kiếm món"}
-                    </h3>
-                    <button
-                      onClick={handleKeyboardClose}
-                      className="keyboard-close"
-                    >
-                      <X size={24} />
-                    </button>
-                  </div>
-
-                  <div className="keyboard-display">
-                    {activeInput === "table"
-                      ? tableNumber || "0"
-                      : activeInput === "paid"
-                      ? displayPaid || "0đ"
-                      : searchTerm || "Nhập tên món..."}
-                  </div>
-
-                  {activeInput === "search" ? (
-                    // Bàn phím chữ cái
-                    <div className="keyboard-grid-alpha">
-                      {[
-                        ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
-                        ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
-                        ["z", "x", "c", "v", "b", "n", "m"],
-                      ].map((row, rowIndex) => (
-                        <div key={rowIndex} className="keyboard-row">
-                          {row.map((letter) => (
-                            <button
-                              key={letter}
-                              onClick={() => handleKeyboardClick(letter)}
-                              className="keyboard-btn letter"
-                            >
-                              {letter.toUpperCase()}
-                            </button>
-                          ))}
-                        </div>
-                      ))}
-                      <div className="keyboard-row">
-                        <button
-                          onClick={() => handleKeyboardClick("clear")}
-                          className="keyboard-btn clear"
-                        >
-                          XÓA HẾT
-                        </button>
-                        <button
-                          onClick={() => handleKeyboardClick("space")}
-                          className="keyboard-btn space"
-                        >
-                          SPACE
-                        </button>
-                        <button
-                          onClick={() => handleKeyboardClick("backspace")}
-                          className="keyboard-btn backspace"
-                        >
-                          ⌫
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    // Bàn phím số
-                    <div className="keyboard-grid">
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                        <button
-                          key={num}
-                          onClick={() => handleKeyboardClick(num.toString())}
-                          className="keyboard-btn number"
-                        >
-                          {num}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() => handleKeyboardClick("clear")}
-                        className="keyboard-btn clear"
-                      >
-                        C
-                      </button>
-                      <button
-                        onClick={() => handleKeyboardClick("0")}
-                        className="keyboard-btn number"
-                      >
-                        0
-                      </button>
-                      <button
-                        onClick={() => handleKeyboardClick("backspace")}
-                        className="keyboard-btn backspace"
-                      >
-                        ⌫
-                      </button>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={handleKeyboardClose}
-                    className="keyboard-done"
-                  >
-                    ✓ Xong
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
+
+      {/* Options Modal */}
+      {showOptionsModal && selectedItem && (
+        <div className="options-modal-overlay">
+          <div className="options-modal">
+            <div className="options-modal-header">
+              <h3 className="options-modal-title">{selectedItem.name}</h3>
+              <button
+                onClick={() => setShowOptionsModal(false)}
+                className="options-modal-close"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div>
+              {selectedItem.hasPriceOptions && (
+                <div className="options-section">
+                  <label className="options-label">Chọn mức giá:</label>
+                  <div className="temperature-buttons">
+                    <button
+                      onClick={() =>
+                        setTempOptions({ ...tempOptions, priceOption: "base" })
+                      }
+                      className={`temp-btn ${
+                        tempOptions.priceOption === "base" ? "active" : ""
+                      }`}
+                      style={{
+                        background:
+                          tempOptions.priceOption === "base"
+                            ? "#10b981"
+                            : "#d1fae5",
+                        color:
+                          tempOptions.priceOption === "base"
+                            ? "white"
+                            : "#065f46",
+                      }}
+                    >
+                      💵 {selectedItem.price.toLocaleString("vi-VN")}đ
+                    </button>
+                    <button
+                      onClick={() =>
+                        setTempOptions({ ...tempOptions, priceOption: "max" })
+                      }
+                      className={`temp-btn ${
+                        tempOptions.priceOption === "max" ? "active" : ""
+                      }`}
+                      style={{
+                        background:
+                          tempOptions.priceOption === "max"
+                            ? "#f59e0b"
+                            : "#fef3c7",
+                        color:
+                          tempOptions.priceOption === "max"
+                            ? "white"
+                            : "#92400e",
+                      }}
+                    >
+                      💰 {selectedItem.maxPrice.toLocaleString("vi-VN")}đ
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="options-section">
+                <label className="options-label">Tùy chọn thêm:</label>
+                <div className="options-checkboxes">
+                  {selectedItem.hasTemp && (
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={tempOptions.isHot}
+                        onChange={(e) =>
+                          setTempOptions({
+                            ...tempOptions,
+                            isHot: e.target.checked,
+                          })
+                        }
+                        className="checkbox-input"
+                      />
+                      <span className="checkbox-text">🔥 Nóng</span>
+                    </label>
+                  )}
+                  {selectedItem.hasCoffeeOptions && (
+                    <>
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={tempOptions.coffeeLevel === "more-milk"}
+                          onChange={(e) =>
+                            setTempOptions({
+                              ...tempOptions,
+                              coffeeLevel: e.target.checked
+                                ? "more-milk"
+                                : "normal",
+                            })
+                          }
+                          className="checkbox-input"
+                        />
+                        <span className="checkbox-text">🥛 Nhiều sữa</span>
+                      </label>
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={tempOptions.coffeeLevel === "less-milk"}
+                          onChange={(e) =>
+                            setTempOptions({
+                              ...tempOptions,
+                              coffeeLevel: e.target.checked
+                                ? "less-milk"
+                                : "normal",
+                            })
+                          }
+                          className="checkbox-input"
+                        />
+                        <span className="checkbox-text">🥛 Ít sữa</span>
+                      </label>
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={tempOptions.coffeeLevel === "more-coffee"}
+                          onChange={(e) =>
+                            setTempOptions({
+                              ...tempOptions,
+                              coffeeLevel: e.target.checked
+                                ? "more-coffee"
+                                : "normal",
+                            })
+                          }
+                          className="checkbox-input"
+                        />
+                        <span className="checkbox-text">☕ Cafe nhiều</span>
+                      </label>
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={tempOptions.coffeeLevel === "less-coffee"}
+                          onChange={(e) =>
+                            setTempOptions({
+                              ...tempOptions,
+                              coffeeLevel: e.target.checked
+                                ? "less-coffee"
+                                : "normal",
+                            })
+                          }
+                          className="checkbox-input"
+                        />
+                        <span className="checkbox-text">☕ Cafe ít</span>
+                      </label>
+                    </>
+                  )}
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={tempOptions.lessSweet}
+                      onChange={(e) =>
+                        setTempOptions({
+                          ...tempOptions,
+                          lessSweet: e.target.checked,
+                        })
+                      }
+                      className="checkbox-input"
+                    />
+                    <span className="checkbox-text">🍬 Ít ngọt</span>
+                  </label>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={tempOptions.lessIce}
+                      onChange={(e) =>
+                        setTempOptions({
+                          ...tempOptions,
+                          lessIce: e.target.checked,
+                        })
+                      }
+                      className="checkbox-input"
+                    />
+                    <span className="checkbox-text">🧊 Ít đá</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-actions">
+              <button
+                onClick={() => setShowOptionsModal(false)}
+                className="modal-btn cancel"
+              >
+                Hủy
+              </button>
+              <button onClick={confirmAddToCart} className="modal-btn confirm">
+                Thêm vào giỏ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Virtual Keyboard */}
+      {showKeyboard && (
+        <div className="keyboard-overlay">
+          <div
+            className="keyboard-modal"
+            style={{ maxWidth: activeInput === "search" ? "600px" : "400px" }}
+          >
+            <div className="keyboard-header">
+              <h3 className="keyboard-title">
+                {activeInput === "table"
+                  ? "Nhập số bàn"
+                  : activeInput === "paid"
+                  ? "Nhập tiền khách đưa"
+                  : "Tìm kiếm món"}
+              </h3>
+              <button onClick={handleKeyboardClose} className="keyboard-close">
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="keyboard-display">
+              {activeInput === "table"
+                ? tableNumber || "0"
+                : activeInput === "paid"
+                ? displayPaid || "0đ"
+                : searchTerm || "Nhập tên món..."}
+            </div>
+
+            {activeInput === "search" ? (
+              // Bàn phím chữ cái
+              <div className="keyboard-grid-alpha">
+                {[
+                  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+                  ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
+                  ["z", "x", "c", "v", "b", "n", "m"],
+                ].map((row, rowIndex) => (
+                  <div key={rowIndex} className="keyboard-row">
+                    {row.map((letter) => (
+                      <button
+                        key={letter}
+                        onClick={() => handleKeyboardClick(letter)}
+                        className="keyboard-btn letter"
+                      >
+                        {letter.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+                <div className="keyboard-row">
+                  <button
+                    onClick={() => handleKeyboardClick("clear")}
+                    className="keyboard-btn clear"
+                  >
+                    XÓA HẾT
+                  </button>
+                  <button
+                    onClick={() => handleKeyboardClick("space")}
+                    className="keyboard-btn space"
+                  >
+                    SPACE
+                  </button>
+                  <button
+                    onClick={() => handleKeyboardClick("backspace")}
+                    className="keyboard-btn backspace"
+                  >
+                    ⌫
+                  </button>
+                </div>
+              </div>
+            ) : (
+              // Bàn phím số
+              <div className="keyboard-grid">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                  <button
+                    key={num}
+                    onClick={() => handleKeyboardClick(num.toString())}
+                    className="keyboard-btn number"
+                  >
+                    {num}
+                  </button>
+                ))}
+                <button
+                  onClick={() => handleKeyboardClick("clear")}
+                  className="keyboard-btn clear"
+                >
+                  C
+                </button>
+                <button
+                  onClick={() => handleKeyboardClick("0")}
+                  className="keyboard-btn number"
+                >
+                  0
+                </button>
+                <button
+                  onClick={() => handleKeyboardClick("backspace")}
+                  className="keyboard-btn backspace"
+                >
+                  ⌫
+                </button>
+              </div>
+            )}
+
+            <button onClick={handleKeyboardClose} className="keyboard-done">
+              ✓ Xong
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
