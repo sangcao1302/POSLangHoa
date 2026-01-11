@@ -338,12 +338,8 @@ const CafePOS = () => {
           .payment-value { font-weight: bold; color: #000; }
           .footer { text-align: center; margin-top: 25px; border-top: 2px dashed #000; padding-top: 15px; font-size: 16px; page-break-inside: avoid; }
           @media print { 
-            body { padding: 25px; }
-            @page { margin: 20mm; size: A4; }
-            .item { page-break-inside: avoid; }
-            .header { page-break-after: avoid; }
-            .total-section { page-break-inside: avoid; }
-            .footer { page-break-inside: avoid; }
+            body { padding: 10px; }
+            @page { margin: 10mm; }
           }
         </style>
       </head>
