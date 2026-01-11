@@ -23,8 +23,6 @@
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   overflow: hidden;
 }
-
-/* Header */
 .cafe-pos-header {
   background: linear-gradient(to right, #2563eb, #4f46e5);
   padding: 1.5rem;
@@ -40,21 +38,71 @@
 
 .cafe-pos-subtitle {
   color: #bfdbfe;
+  margin-bottom: 1rem;
 }
 
-/* Layout 2 cột */
-.cafe-pos-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  padding: 1.5rem;
-}
-
-/* Cột trái - Menu */
-.menu-column {
-  height: calc(100vh - 200px);
+/* Tabs Navigation */
+.tabs-navigation {
   display: flex;
-  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-content: center;
+}
+
+.tab-btn {
+  flex: 1;
+  max-width: 300px;
+  padding: 1rem 2rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.tab-btn.active {
+  background: white;
+  color: #2563eb;
+  border-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Tabs Content */
+.tabs-content {
+  padding: 1.5rem;
+  min-height: calc(100vh - 250px);
+}
+
+.menu-tab,
+.payment-tab {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* Search */
@@ -91,7 +139,7 @@
   border-radius: 0.5rem;
   padding: 1rem;
   overflow-y: auto;
-  flex: 1;
+  max-height: calc(100vh - 350px);
 }
 
 .menu-title {
@@ -99,11 +147,6 @@
   font-weight: bold;
   margin-bottom: 1rem;
   color: #1f2937;
-  position: sticky;
-  top: 0;
-  background: #f9fafb;
-  padding-bottom: 0.5rem;
-  z-index: 10;
 }
 
 .category-section {
@@ -119,36 +162,48 @@
   padding-bottom: 0.5rem;
 }
 
-.menu-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
+/* Menu Grid - 2 cột */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.menu-card {
   background: white;
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
-  margin-bottom: 0.5rem;
+  border-radius: 0.75rem;
+  border: 2px solid #e5e7eb;
+  padding: 1.25rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.menu-item:hover {
+.menu-card:hover {
   background: #eff6ff;
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.menu-item-name {
-  font-weight: 500;
+.menu-card-name {
+  font-weight: 600;
   color: #1f2937;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.4;
 }
 
-.menu-item-price {
+.menu-card-price {
   font-weight: bold;
   color: #2563eb;
+  font-size: 1.125rem;
 }
 
 /* Cột phải - Phần tính tiền */
-.payment-column {
-  height: calc(100vh - 200px);
+.payment-tab {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -220,6 +275,58 @@
   border-radius: 0.5rem;
   border: 1px solid #e5e7eb;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Surcharge Button */
+.surcharge-container {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.surcharge-btn {
+  width: 100%;
+  padding: 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  font-size: 1.125rem;
+  border: 3px solid #d1d5db;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.surcharge-btn:hover {
+  background: #f9fafb;
+  border-color: #f59e0b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.surcharge-btn.active {
+  background: linear-gradient(to right, #f59e0b, #d97706);
+  border-color: #f59e0b;
+  color: white;
+  box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+}
+
+.surcharge-btn.active:hover {
+  background: linear-gradient(to right, #d97706, #b45309);
+}
+
+.surcharge-icon {
+  font-size: 1.5rem;
+}
+
+.surcharge-text {
+  font-size: 1.125rem;
 }
 
 .cart-item-header {
@@ -352,6 +459,21 @@
 .total-row.items-count .value {
   font-size: 1.5rem;
   font-weight: bold;
+}
+
+.total-row.surcharge-row {
+  color: #f59e0b;
+  font-size: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+.total-row.surcharge-row .label {
+  color: #f59e0b;
+}
+
+.total-row.surcharge-row .value {
+  color: #f59e0b;
+  font-size: 1.25rem;
 }
 
 .total-row.grand-total .label {
@@ -906,12 +1028,15 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .cafe-pos-grid {
+  .menu-grid {
     grid-template-columns: 1fr;
   }
 
-  .menu-column,
-  .payment-column {
-    height: auto;
+  .tabs-navigation {
+    flex-direction: column;
+  }
+
+  .tab-btn {
+    max-width: 100%;
   }
 }

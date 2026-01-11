@@ -21,7 +21,6 @@ const CafePOS = () => {
       { name: "Sâm bổ lượng hạt đất", price: 35000 },
       { name: "Rau má đậu xanh", price: 22000 },
       { name: "Sữa đậu xanh hạt đất", price: 25000 },
-      { name: "Rau câu trái dừa", price: 30000 },
     ],
     "Giải Nhiệt": [
       { name: "Sâm la hán quả bổng cúc bí đao h.chia", price: 25000 },
@@ -103,9 +102,11 @@ const CafePOS = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [cart, setCart] = useState([]);
+  const [activeTab, setActiveTab] = useState("menu"); // "menu" hoặc "payment"
   const [customerPaid, setCustomerPaid] = useState("");
   const [displayPaid, setDisplayPaid] = useState("");
   const [tableNumber, setTableNumber] = useState("");
+  const [surcharge, setSurcharge] = useState(0); // Phụ thu
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [showKeyboard, setShowKeyboard] = useState(false);
@@ -186,9 +187,11 @@ const CafePOS = () => {
     setCustomerPaid("");
     setDisplayPaid("");
     setTableNumber("");
+    setSurcharge(0);
   };
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total =
+    cart.reduce((sum, item) => sum + item.price * item.quantity, 0) + surcharge;
   const paidAmount = parseFloat(customerPaid) || 0;
   const changeAmount = paidAmount - total;
 
@@ -295,6 +298,7 @@ const CafePOS = () => {
     const savedPaid = customerPaid;
     const savedTotal = total;
     const savedCart = JSON.parse(JSON.stringify(cart));
+    const savedSurcharge = surcharge;
     const savedChange = parseFloat(savedPaid || 0) - savedTotal;
     const savedDate = new Date().toLocaleString("vi-VN");
     const savedTable = tableNumber;
@@ -307,7 +311,7 @@ const CafePOS = () => {
         <title>Phiếu Bán Hàng</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: 'Courier New', monospace; padding: 20px; max-width: 400px; margin: 0 auto; font-size: 16px; }
+          body { font-family: 'Courier New', monospace; padding: 50px; max-width: 500px; margin: 0 auto; font-size: 16px; }
           .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 15px; margin-bottom: 20px; }
           .title { font-size: 28px; font-weight: bold; margin-bottom: 8px; }
           .subtitle { font-size: 20px; margin: 8px 0; }
@@ -334,8 +338,12 @@ const CafePOS = () => {
           .payment-value { font-weight: bold; color: #000; }
           .footer { text-align: center; margin-top: 25px; border-top: 2px dashed #000; padding-top: 15px; font-size: 16px; page-break-inside: avoid; }
           @media print { 
-            body { padding: 10px; }
-            @page { margin: 10mm; }
+            body { padding: 25px; }
+            @page { margin: 20mm; size: A4; }
+            .item { page-break-inside: avoid; }
+            .header { page-break-after: avoid; }
+            .total-section { page-break-inside: avoid; }
+            .footer { page-break-inside: avoid; }
           }
         </style>
       </head>
@@ -395,6 +403,18 @@ const CafePOS = () => {
               0
             )}</span>
           </div>
+          ${
+            savedSurcharge > 0
+              ? `
+          <div class="total-row">
+            <span class="total-label">Phụ thu:</span>
+            <span class="total-value">${savedSurcharge.toLocaleString(
+              "vi-VN"
+            )}đ</span>
+          </div>
+          `
+              : ""
+          }
           <div class="total-row grand-total">
             <span class="total-label">TỔNG TIỀN:</span>
             <span class="total-value">${savedTotal.toLocaleString(
@@ -466,645 +486,730 @@ const CafePOS = () => {
           <div className="cafe-pos-header">
             <h1 className="cafe-pos-title">☕ Cafe Lang Hoa</h1>
             <p className="cafe-pos-subtitle">Hệ Thống Tính Tiền</p>
-          </div>
 
-          <div className="cafe-pos-grid">
-            {/* Cột trái: Menu */}
-            <div className="menu-column">
-              <div className="search-wrapper">
-                <Search className="search-icon" size={20} />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm món..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onFocus={() => handleInputFocus("search")}
-                  className="search-input"
-                  readOnly
-                />
-              </div>
-
-              <div className="menu-container">
-                <h2 className="menu-title">Menu</h2>
-                {Object.entries(menuData).map(([category, items]) => {
-                  const categoryItems = items.filter(
-                    (item) =>
-                      !searchTerm ||
-                      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-                  );
-
-                  if (categoryItems.length === 0) return null;
-
-                  return (
-                    <div key={category} className="category-section">
-                      <h3 className="category-title">{category}</h3>
-                      <div>
-                        {categoryItems.map((item, idx) => (
-                          <div
-                            key={idx}
-                            onClick={() => addToCart(item)}
-                            className="menu-item"
-                          >
-                            <span className="menu-item-name">{item.name}</span>
-                            <span className="menu-item-price">
-                              {item.maxPrice
-                                ? `${formatCurrency(
-                                    item.price
-                                  )} - ${formatCurrency(item.maxPrice)}`
-                                : formatCurrency(item.price)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Cột phải: Phần tính tiền */}
-            <div className="payment-column">
-              {/* Giỏ hàng */}
-              <div className="cart-container">
-                <div className="cart-header">
-                  <h2 className="cart-title">
-                    <ShoppingCart size={24} />
-                    Phiếu Tính Tiền
-                  </h2>
-                  {cart.length > 0 && (
-                    <button onClick={clearCart} className="clear-cart-btn">
-                      <Trash2 size={18} />
-                      Xóa hết
-                    </button>
-                  )}
-                </div>
-
-                {cart.length === 0 ? (
-                  <div className="cart-empty">
-                    <ShoppingCart size={48} className="cart-empty-icon" />
-                    <p>Chưa có món nào được chọn</p>
-                  </div>
-                ) : (
-                  <div className="cart-items">
-                    {cart.map((item, idx) => (
-                      <div key={idx} className="cart-item">
-                        <div className="cart-item-header">
-                          <div style={{ flex: 1 }}>
-                            <span className="cart-item-name">{item.name}</span>
-                            <div className="cart-item-options">
-                              {getOptionsText(item)}
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => removeFromCart(item.uniqueId)}
-                            className="remove-item-btn"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                        <div className="cart-item-controls">
-                          <div className="quantity-controls">
-                            <button
-                              onClick={() => updateQuantity(item.uniqueId, -1)}
-                              className="quantity-btn minus"
-                            >
-                              <Minus size={14} />
-                            </button>
-                            <span className="quantity-display">
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() => updateQuantity(item.uniqueId, 1)}
-                              className="quantity-btn plus"
-                            >
-                              <Plus size={14} />
-                            </button>
-                          </div>
-                          <div className="cart-item-pricing">
-                            <div className="cart-item-unit-price">
-                              {formatCurrency(item.price)} × {item.quantity}
-                            </div>
-                            <div className="cart-item-total-price">
-                              {formatCurrency(item.price * item.quantity)}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Phần thanh toán */}
-              <div className="payment-section">
-                {cart.length > 0 ? (
-                  <>
-                    {/* Tổng tiền */}
-                    <div className="total-container">
-                      <div className="total-row items-count">
-                        <span className="label">Tổng số món</span>
-                        <span className="value">
-                          {cart.reduce((sum, item) => sum + item.quantity, 0)}
-                        </span>
-                      </div>
-                      <div className="total-row grand-total">
-                        <span className="label">TỔNG TIỀN</span>
-                        <span className="value">{formatCurrency(total)}</span>
-                      </div>
-                    </div>
-
-                    {/* Form thanh toán */}
-                    <div className="payment-form">
-                      <h3 className="payment-form-title">💳 Thanh toán</h3>
-                      <div className="payment-input-group">
-                        <label className="payment-label">Số bàn *</label>
-                        <input
-                          type="text"
-                          value={tableNumber}
-                          onChange={(e) => setTableNumber(e.target.value)}
-                          onFocus={() => handleInputFocus("table")}
-                          className="payment-input"
-                          placeholder="Nhập số bàn"
-                          readOnly
-                        />
-                      </div>
-
-                      <div className="payment-input-group">
-                        <label className="payment-label">
-                          Tiền khách đưa *
-                        </label>
-                        <input
-                          type="text"
-                          value={displayPaid}
-                          onChange={handlePaidChange}
-                          onFocus={() => handleInputFocus("paid")}
-                          className="payment-input"
-                          placeholder="Nhập số tiền"
-                          readOnly
-                        />
-                      </div>
-
-                      {paidAmount > 0 && (
-                        <div
-                          className={`change-display ${
-                            paidAmount < total ? "insufficient" : "sufficient"
-                          }`}
-                        >
-                          <div className="change-row">
-                            <span
-                              className={`label ${
-                                paidAmount < total
-                                  ? "insufficient"
-                                  : "sufficient"
-                              }`}
-                            >
-                              {paidAmount < total
-                                ? "⚠️ Còn thiếu"
-                                : "✅ Tiền thối"}
-                            </span>
-                            <span
-                              className={`value ${
-                                paidAmount < total
-                                  ? "insufficient"
-                                  : "sufficient"
-                              }`}
-                            >
-                              {formatCurrency(Math.abs(changeAmount))}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Nút in */}
-                    <button
-                      onClick={printReceipt}
-                      disabled={
-                        !tableNumber ||
-                        !customerPaid ||
-                        parseFloat(customerPaid) < total
-                      }
-                      className="print-btn"
-                    >
-                      <Printer size={32} />
-                      <span>IN PHIẾU BÁN HÀNG</span>
-                    </button>
-
-                    {(!tableNumber ||
-                      !customerPaid ||
-                      parseFloat(customerPaid) < total) && (
-                      <div className="warning-message">
-                        {!tableNumber || !customerPaid
-                          ? "⚠️ Vui lòng nhập đầy đủ số bàn và tiền khách đưa"
-                          : "⚠️ Tiền khách đưa phải ≥ tổng tiền"}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="empty-payment">
-                    <div className="empty-payment-icon">💳</div>
-                    <p className="empty-payment-text">Thêm món để thanh toán</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Options Modal */}
-      {showOptionsModal && selectedItem && (
-        <div className="options-modal-overlay">
-          <div className="options-modal">
-            <div className="options-modal-header">
-              <h3 className="options-modal-title">{selectedItem.name}</h3>
+            {/* Tabs Navigation */}
+            <div className="tabs-navigation">
               <button
-                onClick={() => setShowOptionsModal(false)}
-                className="options-modal-close"
+                className={`tab-btn ${activeTab === "menu" ? "active" : ""}`}
+                onClick={() => setActiveTab("menu")}
               >
-                <X size={24} />
+                📋 Menu
               </button>
-            </div>
-
-            <div>
-              {selectedItem.hasPriceOptions && (
-                <div className="options-section">
-                  <label className="options-label">Chọn mức giá:</label>
-                  <div className="temperature-buttons">
-                    <button
-                      onClick={() =>
-                        setTempOptions({ ...tempOptions, priceOption: "base" })
-                      }
-                      className={`temp-btn ${
-                        tempOptions.priceOption === "base" ? "active" : ""
-                      }`}
-                      style={{
-                        background:
-                          tempOptions.priceOption === "base"
-                            ? "#10b981"
-                            : "#d1fae5",
-                        color:
-                          tempOptions.priceOption === "base"
-                            ? "white"
-                            : "#065f46",
-                      }}
-                    >
-                      💵 {selectedItem.price.toLocaleString("vi-VN")}đ
-                    </button>
-                    <button
-                      onClick={() =>
-                        setTempOptions({ ...tempOptions, priceOption: "max" })
-                      }
-                      className={`temp-btn ${
-                        tempOptions.priceOption === "max" ? "active" : ""
-                      }`}
-                      style={{
-                        background:
-                          tempOptions.priceOption === "max"
-                            ? "#f59e0b"
-                            : "#fef3c7",
-                        color:
-                          tempOptions.priceOption === "max"
-                            ? "white"
-                            : "#92400e",
-                      }}
-                    >
-                      💰 {selectedItem.maxPrice.toLocaleString("vi-VN")}đ
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {selectedItem.hasTemp && (
-                <div className="options-section">
-                  <label className="options-label">Nhiệt độ:</label>
-                  <div className="temperature-buttons">
-                    <button
-                      onClick={() =>
-                        setTempOptions({ ...tempOptions, temperature: "cold" })
-                      }
-                      className={`temp-btn cold ${
-                        tempOptions.temperature === "cold" ? "active" : ""
-                      }`}
-                    >
-                      ❄️ Lạnh
-                    </button>
-                    <button
-                      onClick={() =>
-                        setTempOptions({ ...tempOptions, temperature: "hot" })
-                      }
-                      className={`temp-btn hot ${
-                        tempOptions.temperature === "hot" ? "active" : ""
-                      }`}
-                    >
-                      🔥 Nóng
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {selectedItem.hasCoffeeOptions && (
-                <div className="options-section">
-                  <label className="options-label">Mức độ Cafe/Sữa:</label>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "0.75rem",
-                    }}
-                  >
-                    <button
-                      onClick={() =>
-                        setTempOptions({
-                          ...tempOptions,
-                          coffeeLevel: "more-milk",
-                        })
-                      }
-                      className={`temp-btn ${
-                        tempOptions.coffeeLevel === "more-milk" ? "active" : ""
-                      }`}
-                      style={{
-                        background:
-                          tempOptions.coffeeLevel === "more-milk"
-                            ? "#8b5cf6"
-                            : "#ede9fe",
-                        color:
-                          tempOptions.coffeeLevel === "more-milk"
-                            ? "white"
-                            : "#6b21a8",
-                        fontSize: "0.875rem",
-                        padding: "0.6rem",
-                      }}
-                    >
-                      🥛 Nhiều sữa
-                    </button>
-                    <button
-                      onClick={() =>
-                        setTempOptions({
-                          ...tempOptions,
-                          coffeeLevel: "less-milk",
-                        })
-                      }
-                      className={`temp-btn ${
-                        tempOptions.coffeeLevel === "less-milk" ? "active" : ""
-                      }`}
-                      style={{
-                        background:
-                          tempOptions.coffeeLevel === "less-milk"
-                            ? "#8b5cf6"
-                            : "#ede9fe",
-                        color:
-                          tempOptions.coffeeLevel === "less-milk"
-                            ? "white"
-                            : "#6b21a8",
-                        fontSize: "0.875rem",
-                        padding: "0.6rem",
-                      }}
-                    >
-                      🥛 Ít sữa
-                    </button>
-                    <button
-                      onClick={() =>
-                        setTempOptions({
-                          ...tempOptions,
-                          coffeeLevel: "more-coffee",
-                        })
-                      }
-                      className={`temp-btn ${
-                        tempOptions.coffeeLevel === "more-coffee"
-                          ? "active"
-                          : ""
-                      }`}
-                      style={{
-                        background:
-                          tempOptions.coffeeLevel === "more-coffee"
-                            ? "#92400e"
-                            : "#fef3c7",
-                        color:
-                          tempOptions.coffeeLevel === "more-coffee"
-                            ? "white"
-                            : "#92400e",
-                        fontSize: "0.875rem",
-                        padding: "0.6rem",
-                      }}
-                    >
-                      ☕ Cafe nhiều
-                    </button>
-                    <button
-                      onClick={() =>
-                        setTempOptions({
-                          ...tempOptions,
-                          coffeeLevel: "less-coffee",
-                        })
-                      }
-                      className={`temp-btn ${
-                        tempOptions.coffeeLevel === "less-coffee"
-                          ? "active"
-                          : ""
-                      }`}
-                      style={{
-                        background:
-                          tempOptions.coffeeLevel === "less-coffee"
-                            ? "#92400e"
-                            : "#fef3c7",
-                        color:
-                          tempOptions.coffeeLevel === "less-coffee"
-                            ? "white"
-                            : "#92400e",
-                        fontSize: "0.875rem",
-                        padding: "0.6rem",
-                      }}
-                    >
-                      ☕ Cafe ít
-                    </button>
-                    <button
-                      onClick={() =>
-                        setTempOptions({
-                          ...tempOptions,
-                          coffeeLevel: "normal",
-                        })
-                      }
-                      className={`temp-btn ${
-                        tempOptions.coffeeLevel === "normal" ? "active" : ""
-                      }`}
-                      style={{
-                        background:
-                          tempOptions.coffeeLevel === "normal"
-                            ? "#10b981"
-                            : "#d1fae5",
-                        color:
-                          tempOptions.coffeeLevel === "normal"
-                            ? "white"
-                            : "#065f46",
-                        fontSize: "0.875rem",
-                        padding: "0.6rem",
-                        gridColumn: "1 / -1",
-                      }}
-                    >
-                      ✅ Bình thường
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <div className="options-section">
-                <label className="options-label">Tùy chọn thêm:</label>
-                <div className="options-checkboxes">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={tempOptions.lessSweet}
-                      onChange={(e) =>
-                        setTempOptions({
-                          ...tempOptions,
-                          lessSweet: e.target.checked,
-                        })
-                      }
-                      className="checkbox-input"
-                    />
-                    <span className="checkbox-text">🍬 Ít ngọt</span>
-                  </label>
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={tempOptions.lessIce}
-                      onChange={(e) =>
-                        setTempOptions({
-                          ...tempOptions,
-                          lessIce: e.target.checked,
-                        })
-                      }
-                      className="checkbox-input"
-                    />
-                    <span className="checkbox-text">🧊 Ít đá</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="modal-actions">
               <button
-                onClick={() => setShowOptionsModal(false)}
-                className="modal-btn cancel"
+                className={`tab-btn ${activeTab === "payment" ? "active" : ""}`}
+                onClick={() => setActiveTab("payment")}
               >
-                Hủy
-              </button>
-              <button onClick={confirmAddToCart} className="modal-btn confirm">
-                Thêm vào giỏ
+                💳 Thanh Toán
+                {cart.length > 0 && (
+                  <span className="cart-badge">
+                    {cart.reduce((sum, item) => sum + item.quantity, 0)}
+                  </span>
+                )}
               </button>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Virtual Keyboard */}
-      {showKeyboard && (
-        <div className="keyboard-overlay">
-          <div
-            className="keyboard-modal"
-            style={{ maxWidth: activeInput === "search" ? "600px" : "400px" }}
-          >
-            <div className="keyboard-header">
-              <h3 className="keyboard-title">
-                {activeInput === "table"
-                  ? "Nhập số bàn"
-                  : activeInput === "paid"
-                  ? "Nhập tiền khách đưa"
-                  : "Tìm kiếm món"}
-              </h3>
-              <button onClick={handleKeyboardClose} className="keyboard-close">
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="keyboard-display">
-              {activeInput === "table"
-                ? tableNumber || "0"
-                : activeInput === "paid"
-                ? displayPaid || "0đ"
-                : searchTerm || "Nhập tên món..."}
-            </div>
-
-            {activeInput === "search" ? (
-              // Bàn phím chữ cái
-              <div className="keyboard-grid-alpha">
-                {[
-                  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
-                  ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
-                  ["z", "x", "c", "v", "b", "n", "m"],
-                ].map((row, rowIndex) => (
-                  <div key={rowIndex} className="keyboard-row">
-                    {row.map((letter) => (
-                      <button
-                        key={letter}
-                        onClick={() => handleKeyboardClick(letter)}
-                        className="keyboard-btn letter"
-                      >
-                        {letter.toUpperCase()}
-                      </button>
-                    ))}
-                  </div>
-                ))}
-                <div className="keyboard-row">
-                  <button
-                    onClick={() => handleKeyboardClick("clear")}
-                    className="keyboard-btn clear"
-                  >
-                    XÓA HẾT
-                  </button>
-                  <button
-                    onClick={() => handleKeyboardClick("space")}
-                    className="keyboard-btn space"
-                  >
-                    SPACE
-                  </button>
-                  <button
-                    onClick={() => handleKeyboardClick("backspace")}
-                    className="keyboard-btn backspace"
-                  >
-                    ⌫
-                  </button>
+          <div className="tabs-content">
+            {/* Tab Menu */}
+            {activeTab === "menu" && (
+              <div className="menu-tab">
+                <div className="search-wrapper">
+                  <Search className="search-icon" size={20} />
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm món..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onFocus={() => handleInputFocus("search")}
+                    className="search-input"
+                    readOnly
+                  />
                 </div>
-              </div>
-            ) : (
-              // Bàn phím số
-              <div className="keyboard-grid">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                  <button
-                    key={num}
-                    onClick={() => handleKeyboardClick(num.toString())}
-                    className="keyboard-btn number"
-                  >
-                    {num}
-                  </button>
-                ))}
-                <button
-                  onClick={() => handleKeyboardClick("clear")}
-                  className="keyboard-btn clear"
-                >
-                  C
-                </button>
-                <button
-                  onClick={() => handleKeyboardClick("0")}
-                  className="keyboard-btn number"
-                >
-                  0
-                </button>
-                <button
-                  onClick={() => handleKeyboardClick("backspace")}
-                  className="keyboard-btn backspace"
-                >
-                  ⌫
-                </button>
+
+                <div className="menu-container">
+                  {Object.entries(menuData).map(([category, items]) => {
+                    const categoryItems = items.filter(
+                      (item) =>
+                        !searchTerm ||
+                        item.name
+                          .toLowerCase()
+                          .includes(searchTerm.toLowerCase())
+                    );
+
+                    if (categoryItems.length === 0) return null;
+
+                    return (
+                      <div key={category} className="category-section">
+                        <h3 className="category-title">{category}</h3>
+                        <div className="menu-grid">
+                          {categoryItems.map((item, idx) => (
+                            <div
+                              key={idx}
+                              onClick={() => addToCart(item)}
+                              className="menu-card"
+                            >
+                              <div className="menu-card-name">{item.name}</div>
+                              <div className="menu-card-price">
+                                {item.maxPrice
+                                  ? `${formatCurrency(
+                                      item.price
+                                    )} - ${formatCurrency(item.maxPrice)}`
+                                  : formatCurrency(item.price)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
-            <button onClick={handleKeyboardClose} className="keyboard-done">
-              ✓ Xong
-            </button>
+            {/* Tab Payment */}
+            {activeTab === "payment" && (
+              <div className="payment-tab">
+                {/* Giỏ hàng */}
+                <div className="cart-container">
+                  <div className="cart-header">
+                    <h2 className="cart-title">
+                      <ShoppingCart size={24} />
+                      Phiếu Tính Tiền
+                    </h2>
+
+                    {cart.length > 0 && (
+                      <button onClick={clearCart} className="clear-cart-btn">
+                        <Trash2 size={18} />
+                        Xóa hết
+                      </button>
+                    )}
+                  </div>
+
+                  {cart.length === 0 ? (
+                    <div className="cart-empty">
+                      <ShoppingCart size={48} className="cart-empty-icon" />
+                      <p>Chưa có món nào được chọn</p>
+                    </div>
+                  ) : (
+                    <div className="cart-items">
+                      {cart.map((item, idx) => (
+                        <div key={idx} className="cart-item">
+                          <div className="cart-item-header">
+                            <div style={{ flex: 1 }}>
+                              <span className="cart-item-name">
+                                {item.name}
+                              </span>
+                              <div className="cart-item-options">
+                                {getOptionsText(item)}
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => removeFromCart(item.uniqueId)}
+                              className="remove-item-btn"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+
+                          <div className="cart-item-controls">
+                            <div className="quantity-controls">
+                              <button
+                                onClick={() =>
+                                  updateQuantity(item.uniqueId, -1)
+                                }
+                                className="quantity-btn minus"
+                              >
+                                <Minus size={14} />
+                              </button>
+
+                              <span className="quantity-display">
+                                {item.quantity}
+                              </span>
+
+                              <button
+                                onClick={() => updateQuantity(item.uniqueId, 1)}
+                                className="quantity-btn plus"
+                              >
+                                <Plus size={14} />
+                              </button>
+                            </div>
+
+                            <div className="cart-item-pricing">
+                              <div className="cart-item-unit-price">
+                                {formatCurrency(item.price)} × {item.quantity}
+                              </div>
+                              <div className="cart-item-total-price">
+                                {formatCurrency(item.price * item.quantity)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Button Phụ Thu */}
+                {cart.length > 0 && (
+                  <div className="surcharge-container">
+                    <button
+                      onClick={() => setSurcharge(surcharge > 0 ? 0 : 20000)}
+                      className={`surcharge-btn ${
+                        surcharge > 0 ? "active" : ""
+                      }`}
+                    >
+                      <span className="surcharge-icon">💰</span>
+                      <span className="surcharge-text">
+                        Phụ thu 20k {surcharge > 0 && "✓"}
+                      </span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Phần thanh toán */}
+                <div className="payment-section">
+                  {cart.length > 0 ? (
+                    <>
+                      {/* Tổng tiền */}
+                      <div className="total-container">
+                        <div className="total-row items-count">
+                          <span className="label">Tổng số món</span>
+                          <span className="value">
+                            {cart.reduce((sum, item) => sum + item.quantity, 0)}
+                          </span>
+                        </div>
+
+                        {surcharge > 0 && (
+                          <div className="total-row surcharge-row">
+                            <span className="label">Phụ thu</span>
+                            <span className="value">
+                              {formatCurrency(surcharge)}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="total-row grand-total">
+                          <span className="label">TỔNG TIỀN</span>
+                          <span className="value">{formatCurrency(total)}</span>
+                        </div>
+                      </div>
+
+                      {/* Form thanh toán */}
+                      <div className="payment-form">
+                        <h3 className="payment-form-title">💳 Thanh toán</h3>
+
+                        <div className="payment-input-group">
+                          <label className="payment-label">Số bàn *</label>
+                          <input
+                            type="text"
+                            value={tableNumber}
+                            onChange={(e) => setTableNumber(e.target.value)}
+                            onFocus={() => handleInputFocus("table")}
+                            className="payment-input"
+                            placeholder="Nhập số bàn"
+                            readOnly
+                          />
+                        </div>
+
+                        <div className="payment-input-group">
+                          <label className="payment-label">
+                            Tiền khách đưa *
+                          </label>
+                          <input
+                            type="text"
+                            value={displayPaid}
+                            onChange={handlePaidChange}
+                            onFocus={() => handleInputFocus("paid")}
+                            className="payment-input"
+                            placeholder="Nhập số tiền"
+                            readOnly
+                          />
+                        </div>
+
+                        {paidAmount > 0 && (
+                          <div
+                            className={`change-display ${
+                              paidAmount < total ? "insufficient" : "sufficient"
+                            }`}
+                          >
+                            <div className="change-row">
+                              <span className="label">
+                                {paidAmount < total
+                                  ? "⚠️ Còn thiếu"
+                                  : "✅ Tiền thối"}
+                              </span>
+                              <span className="value">
+                                {formatCurrency(Math.abs(changeAmount))}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Nút in */}
+                      <button
+                        onClick={printReceipt}
+                        disabled={
+                          !tableNumber ||
+                          !customerPaid ||
+                          parseFloat(customerPaid) < total
+                        }
+                        className="print-btn"
+                      >
+                        <Printer size={32} />
+                        <span>IN PHIẾU BÁN HÀNG</span>
+                      </button>
+
+                      {(!tableNumber ||
+                        !customerPaid ||
+                        parseFloat(customerPaid) < total) && (
+                        <div className="warning-message">
+                          {!tableNumber || !customerPaid
+                            ? "⚠️ Vui lòng nhập đầy đủ số bàn và tiền khách đưa"
+                            : "⚠️ Tiền khách đưa phải ≥ tổng tiền"}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="empty-payment">
+                      <div className="empty-payment-icon">💳</div>
+                      <p className="empty-payment-text">
+                        Thêm món để thanh toán
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Options Modal */}
+            {showOptionsModal && selectedItem && (
+              <div className="options-modal-overlay">
+                <div className="options-modal">
+                  <div className="options-modal-header">
+                    <h3 className="options-modal-title">{selectedItem.name}</h3>
+                    <button
+                      onClick={() => setShowOptionsModal(false)}
+                      className="options-modal-close"
+                    >
+                      <X size={24} />
+                    </button>
+                  </div>
+
+                  <div>
+                    {selectedItem.hasPriceOptions && (
+                      <div className="options-section">
+                        <label className="options-label">Chọn mức giá:</label>
+                        <div className="temperature-buttons">
+                          <button
+                            onClick={() =>
+                              setTempOptions({
+                                ...tempOptions,
+                                priceOption: "base",
+                              })
+                            }
+                            className={`temp-btn ${
+                              tempOptions.priceOption === "base" ? "active" : ""
+                            }`}
+                            style={{
+                              background:
+                                tempOptions.priceOption === "base"
+                                  ? "#10b981"
+                                  : "#d1fae5",
+                              color:
+                                tempOptions.priceOption === "base"
+                                  ? "white"
+                                  : "#065f46",
+                            }}
+                          >
+                            💵 {selectedItem.price.toLocaleString("vi-VN")}đ
+                          </button>
+                          <button
+                            onClick={() =>
+                              setTempOptions({
+                                ...tempOptions,
+                                priceOption: "max",
+                              })
+                            }
+                            className={`temp-btn ${
+                              tempOptions.priceOption === "max" ? "active" : ""
+                            }`}
+                            style={{
+                              background:
+                                tempOptions.priceOption === "max"
+                                  ? "#f59e0b"
+                                  : "#fef3c7",
+                              color:
+                                tempOptions.priceOption === "max"
+                                  ? "white"
+                                  : "#92400e",
+                            }}
+                          >
+                            💰 {selectedItem.maxPrice.toLocaleString("vi-VN")}đ
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedItem.hasTemp && (
+                      <div className="options-section">
+                        <label className="options-label">Nhiệt độ:</label>
+                        <div className="temperature-buttons">
+                          <button
+                            onClick={() =>
+                              setTempOptions({
+                                ...tempOptions,
+                                temperature: "cold",
+                              })
+                            }
+                            className={`temp-btn cold ${
+                              tempOptions.temperature === "cold" ? "active" : ""
+                            }`}
+                          >
+                            ❄️ Lạnh
+                          </button>
+                          <button
+                            onClick={() =>
+                              setTempOptions({
+                                ...tempOptions,
+                                temperature: "hot",
+                              })
+                            }
+                            className={`temp-btn hot ${
+                              tempOptions.temperature === "hot" ? "active" : ""
+                            }`}
+                          >
+                            🔥 Nóng
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedItem.hasCoffeeOptions && (
+                      <div className="options-section">
+                        <label className="options-label">
+                          Mức độ Cafe/Sữa:
+                        </label>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "1fr 1fr",
+                            gap: "0.75rem",
+                          }}
+                        >
+                          <button
+                            onClick={() =>
+                              setTempOptions({
+                                ...tempOptions,
+                                coffeeLevel: "more-milk",
+                              })
+                            }
+                            className={`temp-btn ${
+                              tempOptions.coffeeLevel === "more-milk"
+                                ? "active"
+                                : ""
+                            }`}
+                            style={{
+                              background:
+                                tempOptions.coffeeLevel === "more-milk"
+                                  ? "#8b5cf6"
+                                  : "#ede9fe",
+                              color:
+                                tempOptions.coffeeLevel === "more-milk"
+                                  ? "white"
+                                  : "#6b21a8",
+                              fontSize: "0.875rem",
+                              padding: "0.6rem",
+                            }}
+                          >
+                            🥛 Nhiều sữa
+                          </button>
+                          <button
+                            onClick={() =>
+                              setTempOptions({
+                                ...tempOptions,
+                                coffeeLevel: "less-milk",
+                              })
+                            }
+                            className={`temp-btn ${
+                              tempOptions.coffeeLevel === "less-milk"
+                                ? "active"
+                                : ""
+                            }`}
+                            style={{
+                              background:
+                                tempOptions.coffeeLevel === "less-milk"
+                                  ? "#8b5cf6"
+                                  : "#ede9fe",
+                              color:
+                                tempOptions.coffeeLevel === "less-milk"
+                                  ? "white"
+                                  : "#6b21a8",
+                              fontSize: "0.875rem",
+                              padding: "0.6rem",
+                            }}
+                          >
+                            🥛 Ít sữa
+                          </button>
+                          <button
+                            onClick={() =>
+                              setTempOptions({
+                                ...tempOptions,
+                                coffeeLevel: "more-coffee",
+                              })
+                            }
+                            className={`temp-btn ${
+                              tempOptions.coffeeLevel === "more-coffee"
+                                ? "active"
+                                : ""
+                            }`}
+                            style={{
+                              background:
+                                tempOptions.coffeeLevel === "more-coffee"
+                                  ? "#92400e"
+                                  : "#fef3c7",
+                              color:
+                                tempOptions.coffeeLevel === "more-coffee"
+                                  ? "white"
+                                  : "#92400e",
+                              fontSize: "0.875rem",
+                              padding: "0.6rem",
+                            }}
+                          >
+                            ☕ Cafe nhiều
+                          </button>
+                          <button
+                            onClick={() =>
+                              setTempOptions({
+                                ...tempOptions,
+                                coffeeLevel: "less-coffee",
+                              })
+                            }
+                            className={`temp-btn ${
+                              tempOptions.coffeeLevel === "less-coffee"
+                                ? "active"
+                                : ""
+                            }`}
+                            style={{
+                              background:
+                                tempOptions.coffeeLevel === "less-coffee"
+                                  ? "#92400e"
+                                  : "#fef3c7",
+                              color:
+                                tempOptions.coffeeLevel === "less-coffee"
+                                  ? "white"
+                                  : "#92400e",
+                              fontSize: "0.875rem",
+                              padding: "0.6rem",
+                            }}
+                          >
+                            ☕ Cafe ít
+                          </button>
+                          <button
+                            onClick={() =>
+                              setTempOptions({
+                                ...tempOptions,
+                                coffeeLevel: "normal",
+                              })
+                            }
+                            className={`temp-btn ${
+                              tempOptions.coffeeLevel === "normal"
+                                ? "active"
+                                : ""
+                            }`}
+                            style={{
+                              background:
+                                tempOptions.coffeeLevel === "normal"
+                                  ? "#10b981"
+                                  : "#d1fae5",
+                              color:
+                                tempOptions.coffeeLevel === "normal"
+                                  ? "white"
+                                  : "#065f46",
+                              fontSize: "0.875rem",
+                              padding: "0.6rem",
+                              gridColumn: "1 / -1",
+                            }}
+                          >
+                            ✅ Bình thường
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="options-section">
+                      <label className="options-label">Tùy chọn thêm:</label>
+                      <div className="options-checkboxes">
+                        <label className="checkbox-label">
+                          <input
+                            type="checkbox"
+                            checked={tempOptions.lessSweet}
+                            onChange={(e) =>
+                              setTempOptions({
+                                ...tempOptions,
+                                lessSweet: e.target.checked,
+                              })
+                            }
+                            className="checkbox-input"
+                          />
+                          <span className="checkbox-text">🍬 Ít ngọt</span>
+                        </label>
+                        <label className="checkbox-label">
+                          <input
+                            type="checkbox"
+                            checked={tempOptions.lessIce}
+                            onChange={(e) =>
+                              setTempOptions({
+                                ...tempOptions,
+                                lessIce: e.target.checked,
+                              })
+                            }
+                            className="checkbox-input"
+                          />
+                          <span className="checkbox-text">🧊 Ít đá</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="modal-actions">
+                    <button
+                      onClick={() => setShowOptionsModal(false)}
+                      className="modal-btn cancel"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      onClick={confirmAddToCart}
+                      className="modal-btn confirm"
+                    >
+                      Thêm vào giỏ
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Virtual Keyboard */}
+            {showKeyboard && (
+              <div className="keyboard-overlay">
+                <div
+                  className="keyboard-modal"
+                  style={{
+                    maxWidth: activeInput === "search" ? "600px" : "400px",
+                  }}
+                >
+                  <div className="keyboard-header">
+                    <h3 className="keyboard-title">
+                      {activeInput === "table"
+                        ? "Nhập số bàn"
+                        : activeInput === "paid"
+                        ? "Nhập tiền khách đưa"
+                        : "Tìm kiếm món"}
+                    </h3>
+                    <button
+                      onClick={handleKeyboardClose}
+                      className="keyboard-close"
+                    >
+                      <X size={24} />
+                    </button>
+                  </div>
+
+                  <div className="keyboard-display">
+                    {activeInput === "table"
+                      ? tableNumber || "0"
+                      : activeInput === "paid"
+                      ? displayPaid || "0đ"
+                      : searchTerm || "Nhập tên món..."}
+                  </div>
+
+                  {activeInput === "search" ? (
+                    // Bàn phím chữ cái
+                    <div className="keyboard-grid-alpha">
+                      {[
+                        ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+                        ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
+                        ["z", "x", "c", "v", "b", "n", "m"],
+                      ].map((row, rowIndex) => (
+                        <div key={rowIndex} className="keyboard-row">
+                          {row.map((letter) => (
+                            <button
+                              key={letter}
+                              onClick={() => handleKeyboardClick(letter)}
+                              className="keyboard-btn letter"
+                            >
+                              {letter.toUpperCase()}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                      <div className="keyboard-row">
+                        <button
+                          onClick={() => handleKeyboardClick("clear")}
+                          className="keyboard-btn clear"
+                        >
+                          XÓA HẾT
+                        </button>
+                        <button
+                          onClick={() => handleKeyboardClick("space")}
+                          className="keyboard-btn space"
+                        >
+                          SPACE
+                        </button>
+                        <button
+                          onClick={() => handleKeyboardClick("backspace")}
+                          className="keyboard-btn backspace"
+                        >
+                          ⌫
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    // Bàn phím số
+                    <div className="keyboard-grid">
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                        <button
+                          key={num}
+                          onClick={() => handleKeyboardClick(num.toString())}
+                          className="keyboard-btn number"
+                        >
+                          {num}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => handleKeyboardClick("clear")}
+                        className="keyboard-btn clear"
+                      >
+                        C
+                      </button>
+                      <button
+                        onClick={() => handleKeyboardClick("0")}
+                        className="keyboard-btn number"
+                      >
+                        0
+                      </button>
+                      <button
+                        onClick={() => handleKeyboardClick("backspace")}
+                        className="keyboard-btn backspace"
+                      >
+                        ⌫
+                      </button>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleKeyboardClose}
+                    className="keyboard-done"
+                  >
+                    ✓ Xong
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
