@@ -23,19 +23,19 @@ const removeVietnameseTones = (str) => {
 const CafePOS = () => {
   const menuData = {
     Cafe: [
-      { name: "Cafe đen (cafe hạt)", price: 25000, hasTemp: true },
+      { name: "Cafe đen ", price: 25000, hasTemp: true },
       { name: "Cafe sữa", price: 27000, hasTemp: true, hasCoffeeOptions: true },
       { name: "Bạc xỉu", price: 28000, hasTemp: true, hasCoffeeOptions: true },
     ],
     "Đặc Biệt": [
-      { name: "Sâm bổ lượng hạt đất", price: 35000 },
-      { name: "Rau má đậu xanh", price: 22000 },
-      { name: "Sữa đậu xanh hạt đất", price: 25000 },
+      { name: "Sâm bổ lượng hạt đát", price: 35000 },
+      { name: "Rau má đậu xanh", price: 25000 },
+      { name: "Sữa đậu xanh hạt đát", price: 25000 },
     ],
     "Giải Nhiệt": [
       { name: "Sâm la hán quả bổng cúc bí đao h.chia", price: 25000 },
-      { name: "Mủ trôm mủ gòn hạt đất", price: 25000 },
-      { name: "Nha đam hạt chia hạt đất", price: 25000 },
+      { name: "Mủ trôm mủ gòn hạt đát", price: 25000 },
+      { name: "Nha đam hạt chia hạt đát", price: 25000 },
       { name: "Cacao sữa đá", price: 25000 },
       { name: "Socola sữa đá", price: 25000 },
       { name: "Chanh muối cam thảo", price: 25000 },
@@ -45,7 +45,7 @@ const CafePOS = () => {
     ],
     Yaourt: [
       { name: "Yaourt đá", price: 25000 },
-      { name: "Yaourt hạt đất", price: 25000 },
+      { name: "Yaourt hạt đát", price: 25000 },
       { name: "Yaourt dâu", price: 25000 },
       { name: "Yaourt ổi", price: 25000 },
       { name: "Yaourt việt quất", price: 25000 },
@@ -71,7 +71,7 @@ const CafePOS = () => {
         hasPriceOptions: true,
       },
       { name: "Trà ô long sữa", price: 25000 },
-      { name: "Sirô đá bào", price: 23000 },
+      { name: "Sirô đá bào", price: 25000 },
     ],
     "Sữa Tươi": [
       { name: "Sữa tươi cafe", price: 25000 },
@@ -93,9 +93,9 @@ const CafePOS = () => {
       { name: "Trà đào", price: 25000 },
     ],
     "Trà Nóng": [
-      { name: "Trà hoa cúc hạt chia", price: 22000 },
-      { name: "Trà lipton hạt chia", price: 20000 },
-      { name: "Trà ô long", price: 22000 },
+      { name: "Trà hoa cúc hạt chia", price: 25000 },
+      { name: "Trà lipton hạt chia", price: 25000 },
+      { name: "Trà ô long", price: 25000 },
     ],
     "Sinh Tố": [
       { name: "Sinh tố măng cầu", price: 30000 },
@@ -351,7 +351,7 @@ const CafePOS = () => {
           .wifi-info { margin-top: 10px; text-align: center; font-weight: bold; font-size: 13px; }
           @media print { 
             body { padding: 5px; max-width: 300px; }
-            @page { margin: 0; size: 80mm auto; }
+            @page { margin: 2mm; size: 80mm auto; }
             .item { page-break-inside: avoid; }
             .header { page-break-after: avoid; }
             .total-section { page-break-inside: avoid; }
