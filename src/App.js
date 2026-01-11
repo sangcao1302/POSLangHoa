@@ -18,15 +18,15 @@ const CafePOS = () => {
       { name: "Bạc xỉu", price: 28000, hasTemp: true, hasCoffeeOptions: true },
     ],
     "Đặc Biệt": [
-      { name: "Sâm bổ lượng hạt đát", price: 35000 },
+      { name: "Sâm bổ lượng hạt đất", price: 35000 },
       { name: "Rau má đậu xanh", price: 22000 },
-      { name: "Sữa đậu xanh hạt đát", price: 25000 },
+      { name: "Sữa đậu xanh hạt đất", price: 25000 },
       { name: "Rau câu trái dừa", price: 30000 },
     ],
     "Giải Nhiệt": [
       { name: "Sâm la hán quả bổng cúc bí đao h.chia", price: 25000 },
-      { name: "Mủ trôm mủ gòn hạt đát", price: 25000 },
-      { name: "Nha đam hạt chia hạt đát", price: 25000 },
+      { name: "Mủ trôm mủ gòn hạt đất", price: 25000 },
+      { name: "Nha đam hạt chia hạt đất", price: 25000 },
       { name: "Cacao sữa đá", price: 25000 },
       { name: "Socola sữa đá", price: 25000 },
       { name: "Chanh muối cam thảo", price: 25000 },
@@ -36,7 +36,7 @@ const CafePOS = () => {
     ],
     Yaourt: [
       { name: "Yaourt đá", price: 25000 },
-      { name: "Yaourt hạt đát", price: 25000 },
+      { name: "Yaourt hạt đất", price: 25000 },
       { name: "Yaourt dâu", price: 25000 },
       { name: "Yaourt ổi", price: 25000 },
       { name: "Yaourt việt quất", price: 25000 },
@@ -109,7 +109,7 @@ const CafePOS = () => {
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [showKeyboard, setShowKeyboard] = useState(false);
-  const [activeInput, setActiveInput] = useState(null); // "table" hoặc "paid"
+  const [activeInput, setActiveInput] = useState(null); // "table", "paid", hoặc "search"
   const [tempOptions, setTempOptions] = useState({
     temperature: "cold",
     lessSweet: false,
@@ -230,6 +230,16 @@ const CafePOS = () => {
         const newValue = customerPaid + value;
         setCustomerPaid(newValue);
         setDisplayPaid(parseInt(newValue).toLocaleString("vi-VN"));
+      }
+    } else if (activeInput === "search") {
+      if (value === "backspace") {
+        setSearchTerm(searchTerm.slice(0, -1));
+      } else if (value === "clear") {
+        setSearchTerm("");
+      } else if (value === "space") {
+        setSearchTerm(searchTerm + " ");
+      } else {
+        setSearchTerm(searchTerm + value);
       }
     }
   };
@@ -454,7 +464,7 @@ const CafePOS = () => {
       <div className="cafe-pos-wrapper">
         <div className="cafe-pos-card">
           <div className="cafe-pos-header">
-            <h1 className="cafe-pos-title">Cafe Làng Hoa</h1>
+            <h1 className="cafe-pos-title">☕ Cafe Lang Hoa</h1>
             <p className="cafe-pos-subtitle">Hệ Thống Tính Tiền</p>
           </div>
 
@@ -468,7 +478,9 @@ const CafePOS = () => {
                   placeholder="Tìm kiếm món..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  onFocus={() => handleInputFocus("search")}
                   className="search-input"
+                  readOnly
                 />
               </div>
 
@@ -988,12 +1000,17 @@ const CafePOS = () => {
       {/* Virtual Keyboard */}
       {showKeyboard && (
         <div className="keyboard-overlay">
-          <div className="keyboard-modal">
+          <div
+            className="keyboard-modal"
+            style={{ maxWidth: activeInput === "search" ? "600px" : "400px" }}
+          >
             <div className="keyboard-header">
               <h3 className="keyboard-title">
                 {activeInput === "table"
                   ? "Nhập số bàn"
-                  : "Nhập tiền khách đưa"}
+                  : activeInput === "paid"
+                  ? "Nhập tiền khách đưa"
+                  : "Tìm kiếm món"}
               </h3>
               <button onClick={handleKeyboardClose} className="keyboard-close">
                 <X size={24} />
@@ -1003,38 +1020,84 @@ const CafePOS = () => {
             <div className="keyboard-display">
               {activeInput === "table"
                 ? tableNumber || "0"
-                : displayPaid || "0đ"}
+                : activeInput === "paid"
+                ? displayPaid || "0đ"
+                : searchTerm || "Nhập tên món..."}
             </div>
 
-            <div className="keyboard-grid">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+            {activeInput === "search" ? (
+              // Bàn phím chữ cái
+              <div className="keyboard-grid-alpha">
+                {[
+                  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+                  ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
+                  ["z", "x", "c", "v", "b", "n", "m"],
+                ].map((row, rowIndex) => (
+                  <div key={rowIndex} className="keyboard-row">
+                    {row.map((letter) => (
+                      <button
+                        key={letter}
+                        onClick={() => handleKeyboardClick(letter)}
+                        className="keyboard-btn letter"
+                      >
+                        {letter.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+                <div className="keyboard-row">
+                  <button
+                    onClick={() => handleKeyboardClick("clear")}
+                    className="keyboard-btn clear"
+                  >
+                    XÓA HẾT
+                  </button>
+                  <button
+                    onClick={() => handleKeyboardClick("space")}
+                    className="keyboard-btn space"
+                  >
+                    SPACE
+                  </button>
+                  <button
+                    onClick={() => handleKeyboardClick("backspace")}
+                    className="keyboard-btn backspace"
+                  >
+                    ⌫
+                  </button>
+                </div>
+              </div>
+            ) : (
+              // Bàn phím số
+              <div className="keyboard-grid">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                  <button
+                    key={num}
+                    onClick={() => handleKeyboardClick(num.toString())}
+                    className="keyboard-btn number"
+                  >
+                    {num}
+                  </button>
+                ))}
                 <button
-                  key={num}
-                  onClick={() => handleKeyboardClick(num.toString())}
+                  onClick={() => handleKeyboardClick("clear")}
+                  className="keyboard-btn clear"
+                >
+                  C
+                </button>
+                <button
+                  onClick={() => handleKeyboardClick("0")}
                   className="keyboard-btn number"
                 >
-                  {num}
+                  0
                 </button>
-              ))}
-              <button
-                onClick={() => handleKeyboardClick("clear")}
-                className="keyboard-btn clear"
-              >
-                C
-              </button>
-              <button
-                onClick={() => handleKeyboardClick("0")}
-                className="keyboard-btn number"
-              >
-                0
-              </button>
-              <button
-                onClick={() => handleKeyboardClick("backspace")}
-                className="keyboard-btn backspace"
-              >
-                ⌫
-              </button>
-            </div>
+                <button
+                  onClick={() => handleKeyboardClick("backspace")}
+                  className="keyboard-btn backspace"
+                >
+                  ⌫
+                </button>
+              </div>
+            )}
 
             <button onClick={handleKeyboardClose} className="keyboard-done">
               ✓ Xong
