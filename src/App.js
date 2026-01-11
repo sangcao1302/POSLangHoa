@@ -23,19 +23,19 @@ const removeVietnameseTones = (str) => {
 const CafePOS = () => {
   const menuData = {
     Cafe: [
-      { name: "Cafe đen ", price: 25000, hasTemp: true },
+      { name: "Cafe đen (cafe hạt)", price: 25000, hasTemp: true },
       { name: "Cafe sữa", price: 27000, hasTemp: true, hasCoffeeOptions: true },
       { name: "Bạc xỉu", price: 28000, hasTemp: true, hasCoffeeOptions: true },
     ],
     "Đặc Biệt": [
-      { name: "Sâm bổ lượng hạt đát", price: 35000 },
-      { name: "Rau má đậu xanh", price: 25000 },
-      { name: "Sữa đậu xanh hạt đát", price: 25000 },
+      { name: "Sâm bổ lượng hạt đất", price: 35000 },
+      { name: "Rau má đậu xanh", price: 22000 },
+      { name: "Sữa đậu xanh hạt đất", price: 25000 },
     ],
     "Giải Nhiệt": [
-      { name: "Sâm la hán quả", price: 25000 },
-      { name: "Mủ trôm mủ gòn hạt đát", price: 25000 },
-      { name: "Nha đam hạt chia hạt đát", price: 25000 },
+      { name: "Sâm la hán quả bổng cúc bí đao h.chia", price: 25000 },
+      { name: "Mủ trôm mủ gòn hạt đất", price: 25000 },
+      { name: "Nha đam hạt chia hạt đất", price: 25000 },
       { name: "Cacao sữa đá", price: 25000 },
       { name: "Socola sữa đá", price: 25000 },
       { name: "Chanh muối cam thảo", price: 25000 },
@@ -45,7 +45,7 @@ const CafePOS = () => {
     ],
     Yaourt: [
       { name: "Yaourt đá", price: 25000 },
-      { name: "Yaourt hạt đát", price: 25000 },
+      { name: "Yaourt hạt đất", price: 25000 },
       { name: "Yaourt dâu", price: 25000 },
       { name: "Yaourt ổi", price: 25000 },
       { name: "Yaourt việt quất", price: 25000 },
@@ -71,7 +71,7 @@ const CafePOS = () => {
         hasPriceOptions: true,
       },
       { name: "Trà ô long sữa", price: 25000 },
-      { name: "Sirô đá bào", price: 25000 },
+      { name: "Sirô đá bào", price: 23000 },
     ],
     "Sữa Tươi": [
       { name: "Sữa tươi cafe", price: 25000 },
@@ -93,9 +93,9 @@ const CafePOS = () => {
       { name: "Trà đào", price: 25000 },
     ],
     "Trà Nóng": [
-      { name: "Trà hoa cúc hạt chia", price: 25000 },
-      { name: "Trà lipton hạt chia", price: 25000 },
-      { name: "Trà ô long", price: 25000 },
+      { name: "Trà hoa cúc hạt chia", price: 22000 },
+      { name: "Trà lipton hạt chia", price: 20000 },
+      { name: "Trà ô long", price: 22000 },
     ],
     "Sinh Tố": [
       { name: "Sinh tố măng cầu", price: 30000 },
@@ -321,34 +321,37 @@ const CafePOS = () => {
         <title>Phiếu Bán Hàng</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: 'Courier New', monospace; padding: 30px; max-width: 450px; margin: 0 auto; font-size: 13px; }
+          body { font-family: 'Courier New', monospace; padding: 30px; max-width: 450px; margin: 0 auto; font-size: 12px; }
           .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 12px; }
-          .title { font-size: 22px; font-weight: bold; margin-bottom: 5px; }
-          .subtitle { font-size: 16px; margin: 5px 0; }
-          .datetime { font-size: 13px; margin-top: 5px; color: #000; font-weight: bold; }
+          .title { font-size: 21px; font-weight: bold; margin-bottom: 5px; }
+          .subtitle { font-size: 15px; margin: 5px 0; }
+          .datetime { font-size: 12px; margin-top: 5px; color: #000; font-weight: bold; }
           .items { margin: 12px 0; }
-          .item-header-row { display: flex; justify-content: space-between; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; font-size: 13px; }
-          .item-header-row span:nth-child(1) { flex: 1; max-width: 60%; }
-          .item-header-row span:nth-child(2) { min-width: 50px; text-align: center; }
-          .item-header-row span:nth-child(3) { min-width: 90px; text-align: right; }
+          .item-header-row { display: flex; justify-content: space-between; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; font-size: 12px; }
+          .item-header-row span:nth-child(1) { flex: 1; max-width: 50%; }
+          .item-header-row span:nth-child(2) { min-width: 55px; text-align: center; }
+          .item-header-row span:nth-child(3) { min-width: 60px; text-align: right; }
+          .item-header-row span:nth-child(4) { min-width: 70px; text-align: right; }
           .item { margin: 8px 0; page-break-inside: avoid; }
-          .item-row { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 3px; align-items: flex-start; font-size: 13px; }
-          .item-row .item-name { flex: 1; max-width: 60%; word-wrap: break-word; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
-          .item-row .item-qty { min-width: 50px; text-align: center; }
-          .item-row .item-price { min-width: 90px; text-align: right; }
-          .item-options { font-size: 11px; color: #000; font-style: italic; margin-top: 2px; font-weight: bold; }
+          .item-row { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 3px; align-items: flex-start; font-size: 12px; }
+          .item-row .item-name { flex: 1; max-width: 50%; word-wrap: break-word; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
+          .item-row .item-qty { min-width: 55px; text-align: center; }
+          .item-row .item-unit-price { min-width: 60px; text-align: right; }
+          .item-row .item-price { min-width: 70px; text-align: right; }
+          .item-options { font-size: 10px; color: #000; font-style: italic; margin-top: 2px; font-weight: bold; }
           .total-section { margin-top: 12px; border-top: 2px dashed #000; padding-top: 10px; page-break-inside: avoid; }
-          .total-row { display: flex; justify-content: space-between; margin: 5px 0; font-size: 13px; }
+          .total-row { display: flex; justify-content: space-between; margin: 5px 0; font-size: 12px; }
           .total-label { font-weight: bold; color: #000; }
           .total-value { font-weight: bold; color: #000; }
-          .grand-total { font-size: 18px; font-weight: bold; margin: 8px 0; }
+          .grand-total { font-size: 17px; font-weight: bold; margin: 8px 0; }
           .payment { border-top: 1px dashed #000; margin-top: 8px; padding-top: 8px; }
           .payment-label { font-weight: bold; color: #000; }
           .payment-value { font-weight: bold; color: #000; }
-          .footer { text-align: center; margin-top: 15px; border-top: 2px dashed #000; padding-top: 10px; font-size: 13px; page-break-inside: avoid; }
+          .footer { text-align: center; margin-top: 15px; border-top: 2px dashed #000; padding-top: 10px; font-size: 12px; page-break-inside: avoid; }
+          .wifi-info { margin-top: 10px; text-align: center; font-weight: bold; font-size: 13px; }
           @media print { 
-            body { padding: 10px; max-width: 350px; }
-            @page { margin: 5mm; size: 80mm auto; }
+            body { padding: 5px; max-width: 300px; }
+            @page { margin: 0; size: 80mm auto; }
             .item { page-break-inside: avoid; }
             .header { page-break-after: avoid; }
             .total-section { page-break-inside: avoid; }
@@ -367,6 +370,7 @@ const CafePOS = () => {
           <div class="item-header-row">
             <span>Tên món</span>
             <span>SL</span>
+            <span>Đơn giá</span>
             <span>Thành tiền</span>
           </div>
     `;
@@ -385,6 +389,9 @@ const CafePOS = () => {
           <div class="item-row">
             <span class="item-name">${item.name}</span>
             <span class="item-qty">x${item.quantity}</span>
+            <span class="item-unit-price">${item.price.toLocaleString(
+              "vi-VN"
+            )}đ</span>
             <span class="item-price">${(
               item.price * item.quantity
             ).toLocaleString("vi-VN")}đ</span>
@@ -454,6 +461,7 @@ const CafePOS = () => {
         <div class="footer">
           <div>Cảm ơn quý khách!</div>
           <div>Hẹn gặp lại!</div>
+          <div class="wifi-info">WiFi Password: 22222222</div>
         </div>
       </body>
       </html>
