@@ -380,7 +380,7 @@ const CafePOS = () => {
           .wifi-info { margin-top: 10px; text-align: center; font-weight: bold; font-size: 13px; }
           @media print { 
             body { padding: 5px; max-width: 300px; }
-            @page { margin: 2mm; size: 80mm auto; }
+            @page { margin: 5mm; size: 80mm auto; }
             .item { page-break-inside: avoid; }
             .header { page-break-after: avoid; }
             .total-section { page-break-inside: avoid; }
