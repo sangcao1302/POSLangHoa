@@ -23,7 +23,7 @@ const removeVietnameseTones = (str) => {
 const CafePOS = () => {
   const menuData = {
     Cafe: [
-      { name: "Cafe đen", price: 25000, hasTemp: true },
+      { name: "Cafe đen ", price: 25000, hasTemp: true },
       { name: "Cafe sữa", price: 27000, hasTemp: true, hasCoffeeOptions: true },
       { name: "Bạc xỉu", price: 28000, hasTemp: true, hasCoffeeOptions: true },
     ],
@@ -352,19 +352,19 @@ const CafePOS = () => {
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { font-family: 'Courier New', monospace; padding: 30px; max-width: 450px; margin: 0 auto; font-size: 12px; }
           .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 12px; }
-          .title { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
-          .subtitle { font-size: 13px; margin: 5px 0; }
+          .title { font-size: 21px; font-weight: bold; margin-bottom: 5px; }
+          .subtitle { font-size: 15px; margin: 5px 0; }
           .datetime { font-size: 12px; margin-top: 5px; color: #000; font-weight: bold; }
           .items { margin: 12px 0; }
           .item-header-row { display: flex; justify-content: space-between; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; font-size: 10px; }
-          .item-header-row span:nth-child(1) { flex: 1; max-width: 35%; }
-          .item-header-row span:nth-child(2) { min-width: 30px; text-align: center; }
+          .item-header-row span:nth-child(1) { flex: 1; max-width: 50%; }
+          .item-header-row span:nth-child(2) { min-width: 55px; text-align: center; }
           .item-header-row span:nth-child(3) { min-width: 60px; text-align: right; }
           .item-header-row span:nth-child(4) { min-width: 70px; text-align: right; }
           .item { margin: 8px 0; page-break-inside: avoid; }
           .item-row { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 3px; align-items: flex-start; font-size: 12px; }
-          .item-row .item-name { flex: 1; max-width: 35%; word-wrap: break-word; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
-          .item-row .item-qty { min-width: 30px; text-align: center; }
+          .item-row .item-name { flex: 1; max-width: 50%; word-wrap: break-word; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
+          .item-row .item-qty { min-width: 55px; text-align: center; }
           .item-row .item-unit-price { min-width: 60px; text-align: right; }
           .item-row .item-price { min-width: 70px; text-align: right; }
           .item-options { font-size: 10px; color: #000; font-style: italic; margin-top: 2px; font-weight: bold; }
@@ -406,8 +406,21 @@ const CafePOS = () => {
 
     savedCart.forEach((item) => {
       const opts = [];
-      if (item.hasTemp && item.options?.temperature) {
-        opts.push(item.options.temperature === "hot" ? "Nóng" : "Lạnh");
+      if (item.options?.isHot) {
+        opts.push("Nóng");
+      }
+      if (
+        item.hasCoffeeOptions &&
+        item.options?.coffeeLevel &&
+        item.options.coffeeLevel !== "normal"
+      ) {
+        const coffeeLabels = {
+          "more-milk": "Nhiều sữa",
+          "less-milk": "Ít sữa",
+          "more-coffee": "Cafe nhiều",
+          "less-coffee": "Cafe ít",
+        };
+        opts.push(coffeeLabels[item.options.coffeeLevel]);
       }
       if (item.options?.lessSweet) opts.push("Ít ngọt");
       if (item.options?.lessIce) opts.push("Ít đá");
@@ -1181,5 +1194,4 @@ const CafePOS = () => {
     </div>
   );
 };
-
 export default CafePOS;
