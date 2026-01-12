@@ -31,9 +31,10 @@ const CafePOS = () => {
       { name: "Sâm bổ lượng hạt đát", price: 35000 },
       { name: "Rau má đậu xanh", price: 25000 },
       { name: "Sữa đậu xanh hạt đát", price: 25000 },
+      { name: "Rau câu trái dừa", price: 30000 },
     ],
     "Giải Nhiệt": [
-      { name: "Sâm la hán quả bổng cúc bí đao h.chia", price: 25000 },
+      { name: "Sâm la hán quả", price: 25000 },
       { name: "Mủ trôm mủ gòn hạt đát", price: 25000 },
       { name: "Nha đam hạt chia hạt đát", price: 25000 },
       { name: "Cacao sữa đá", price: 25000 },
