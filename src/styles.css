@@ -860,6 +860,16 @@
   padding: 1rem;
 }
 
+.keyboard-container {
+  display: flex;
+  gap: 1rem;
+  max-width: 95%;
+}
+
+.keyboard-container.with-suggestions {
+  max-width: 1200px;
+}
+
 .keyboard-modal {
   background: white;
   border-radius: 1rem;
@@ -867,6 +877,7 @@
   max-width: 400px;
   width: 100%;
   padding: 1.5rem;
+  flex-shrink: 0;
 }
 
 .keyboard-header {
@@ -1026,16 +1037,74 @@
   transform: translateY(-2px);
 }
 
+/* Suggestions Panel */
+.suggestions-panel {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  width: 400px;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+.suggestions-header {
+  padding: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.suggestions-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.suggestions-list {
+  overflow-y: auto;
+  padding: 1rem;
+  flex: 1;
+}
+
+.suggestion-item {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.suggestion-item:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  transform: translateX(4px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion-name {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.suggestion-price {
+  font-weight: bold;
+  color: #2563eb;
+  font-size: 1.125rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .menu-grid {
     grid-template-columns: 1fr;
   }
-
+  
   .tabs-navigation {
     flex-direction: column;
   }
-
+  
   .tab-btn {
     max-width: 100%;
   }

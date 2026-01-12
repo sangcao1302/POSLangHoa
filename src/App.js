@@ -23,19 +23,19 @@ const removeVietnameseTones = (str) => {
 const CafePOS = () => {
   const menuData = {
     Cafe: [
-      { name: "Cafe đen ", price: 25000, hasTemp: true },
+      { name: "Cafe đen (cafe hạt)", price: 25000, hasTemp: true },
       { name: "Cafe sữa", price: 27000, hasTemp: true, hasCoffeeOptions: true },
       { name: "Bạc xỉu", price: 28000, hasTemp: true, hasCoffeeOptions: true },
     ],
     "Đặc Biệt": [
-      { name: "Sâm bổ lượng hạt đát", price: 35000 },
-      { name: "Rau má đậu xanh", price: 25000 },
-      { name: "Sữa đậu xanh hạt đát", price: 25000 },
+      { name: "Sâm bổ lượng hạt đất", price: 35000 },
+      { name: "Rau má đậu xanh", price: 22000 },
+      { name: "Sữa đậu xanh hạt đất", price: 25000 },
     ],
     "Giải Nhiệt": [
-      { name: "Sâm la hán quả ", price: 25000 },
-      { name: "Mủ trôm mủ gòn hạt đát", price: 25000 },
-      { name: "Nha đam hạt chia hạt đát", price: 25000 },
+      { name: "Sâm la hán quả bổng cúc bí đao h.chia", price: 25000 },
+      { name: "Mủ trôm mủ gòn hạt đất", price: 25000 },
+      { name: "Nha đam hạt chia hạt đất", price: 25000 },
       { name: "Cacao sữa đá", price: 25000 },
       { name: "Socola sữa đá", price: 25000 },
       { name: "Chanh muối cam thảo", price: 25000 },
@@ -45,7 +45,7 @@ const CafePOS = () => {
     ],
     Yaourt: [
       { name: "Yaourt đá", price: 25000 },
-      { name: "Yaourt hạt đát", price: 25000 },
+      { name: "Yaourt hạt đất", price: 25000 },
       { name: "Yaourt dâu", price: 25000 },
       { name: "Yaourt ổi", price: 25000 },
       { name: "Yaourt việt quất", price: 25000 },
@@ -71,7 +71,7 @@ const CafePOS = () => {
         hasPriceOptions: true,
       },
       { name: "Trà ô long sữa", price: 25000 },
-      { name: "Sirô đá bào", price: 25000 },
+      { name: "Sirô đá bào", price: 23000 },
     ],
     "Sữa Tươi": [
       { name: "Sữa tươi cafe", price: 25000 },
@@ -93,9 +93,9 @@ const CafePOS = () => {
       { name: "Trà đào", price: 25000 },
     ],
     "Trà Nóng": [
-      { name: "Trà hoa cúc hạt chia", price: 25000 },
-      { name: "Trà lipton hạt chia", price: 25000 },
-      { name: "Trà ô long", price: 25000 },
+      { name: "Trà hoa cúc hạt chia", price: 22000 },
+      { name: "Trà lipton hạt chia", price: 20000 },
+      { name: "Trà ô long", price: 22000 },
     ],
     "Sinh Tố": [
       { name: "Sinh tố măng cầu", price: 30000 },
@@ -121,6 +121,7 @@ const CafePOS = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [activeInput, setActiveInput] = useState(null); // "table", "paid", hoặc "search"
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [tempOptions, setTempOptions] = useState({
     isHot: false,
     lessSweet: false,
@@ -245,14 +246,33 @@ const CafePOS = () => {
         setDisplayPaid(parseInt(newValue).toLocaleString("vi-VN"));
       }
     } else if (activeInput === "search") {
+      let newSearchTerm = searchTerm;
       if (value === "backspace") {
-        setSearchTerm(searchTerm.slice(0, -1));
+        newSearchTerm = searchTerm.slice(0, -1);
+        setSearchTerm(newSearchTerm);
       } else if (value === "clear") {
-        setSearchTerm("");
+        newSearchTerm = "";
+        setSearchTerm(newSearchTerm);
       } else if (value === "space") {
-        setSearchTerm(searchTerm + " ");
+        newSearchTerm = searchTerm + " ";
+        setSearchTerm(newSearchTerm);
       } else {
-        setSearchTerm(searchTerm + value);
+        newSearchTerm = searchTerm + value;
+        setSearchTerm(newSearchTerm);
+      }
+
+      // Cập nhật gợi ý món
+      if (newSearchTerm.trim()) {
+        const suggestions = allItems
+          .filter((item) =>
+            removeVietnameseTones(item.name).includes(
+              removeVietnameseTones(newSearchTerm)
+            )
+          )
+          .slice(0, 10); // Giới hạn 10 món
+        setSearchSuggestions(suggestions);
+      } else {
+        setSearchSuggestions([]);
       }
     }
   };
@@ -265,6 +285,15 @@ const CafePOS = () => {
   const handleKeyboardClose = () => {
     setShowKeyboard(false);
     setActiveInput(null);
+    setSearchSuggestions([]);
+  };
+
+  const handleSelectSuggestion = (item) => {
+    setShowKeyboard(false);
+    setActiveInput(null);
+    setSearchSuggestions([]);
+    setSearchTerm("");
+    addToCart(item);
   };
 
   const getOptionsText = (item) => {
@@ -803,7 +832,6 @@ const CafePOS = () => {
           </div>
         </div>
       </div>
-
       {/* Options Modal */}
       {showOptionsModal && selectedItem && (
         <div className="options-modal-overlay">
@@ -1000,67 +1028,108 @@ const CafePOS = () => {
           </div>
         </div>
       )}
-
       {/* Virtual Keyboard */}
       {showKeyboard && (
         <div className="keyboard-overlay">
           <div
-            className="keyboard-modal"
-            style={{ maxWidth: activeInput === "search" ? "600px" : "400px" }}
+            className={`keyboard-container ${
+              activeInput === "search" && searchSuggestions.length > 0
+                ? "with-suggestions"
+                : ""
+            }`}
           >
-            <div className="keyboard-header">
-              <h3 className="keyboard-title">
+            <div
+              className="keyboard-modal"
+              style={{ maxWidth: activeInput === "search" ? "600px" : "400px" }}
+            >
+              <div className="keyboard-header">
+                <h3 className="keyboard-title">
+                  {activeInput === "table"
+                    ? "Nhập số bàn"
+                    : activeInput === "paid"
+                    ? "Nhập tiền khách đưa"
+                    : "Tìm kiếm món"}
+                </h3>
+                <button
+                  onClick={handleKeyboardClose}
+                  className="keyboard-close"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="keyboard-display">
                 {activeInput === "table"
-                  ? "Nhập số bàn"
+                  ? tableNumber || "0"
                   : activeInput === "paid"
-                  ? "Nhập tiền khách đưa"
-                  : "Tìm kiếm món"}
-              </h3>
-              <button onClick={handleKeyboardClose} className="keyboard-close">
-                <X size={24} />
-              </button>
-            </div>
+                  ? displayPaid || "0đ"
+                  : searchTerm || "Nhập tên món..."}
+              </div>
 
-            <div className="keyboard-display">
-              {activeInput === "table"
-                ? tableNumber || "0"
-                : activeInput === "paid"
-                ? displayPaid || "0đ"
-                : searchTerm || "Nhập tên món..."}
-            </div>
-
-            {activeInput === "search" ? (
-              // Bàn phím chữ cái
-              <div className="keyboard-grid-alpha">
-                {[
-                  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
-                  ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
-                  ["z", "x", "c", "v", "b", "n", "m"],
-                ].map((row, rowIndex) => (
-                  <div key={rowIndex} className="keyboard-row">
-                    {row.map((letter) => (
-                      <button
-                        key={letter}
-                        onClick={() => handleKeyboardClick(letter)}
-                        className="keyboard-btn letter"
-                      >
-                        {letter.toUpperCase()}
-                      </button>
-                    ))}
+              {activeInput === "search" ? (
+                // Bàn phím chữ cái
+                <div className="keyboard-grid-alpha">
+                  {[
+                    ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+                    ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
+                    ["z", "x", "c", "v", "b", "n", "m"],
+                  ].map((row, rowIndex) => (
+                    <div key={rowIndex} className="keyboard-row">
+                      {row.map((letter) => (
+                        <button
+                          key={letter}
+                          onClick={() => handleKeyboardClick(letter)}
+                          className="keyboard-btn letter"
+                        >
+                          {letter.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                  <div className="keyboard-row">
+                    <button
+                      onClick={() => handleKeyboardClick("clear")}
+                      className="keyboard-btn clear"
+                    >
+                      XÓA HẾT
+                    </button>
+                    <button
+                      onClick={() => handleKeyboardClick("space")}
+                      className="keyboard-btn space"
+                    >
+                      SPACE
+                    </button>
+                    <button
+                      onClick={() => handleKeyboardClick("backspace")}
+                      className="keyboard-btn backspace"
+                    >
+                      ⌫
+                    </button>
                   </div>
-                ))}
-                <div className="keyboard-row">
+                </div>
+              ) : (
+                // Bàn phím số
+                <div className="keyboard-grid">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => handleKeyboardClick(num.toString())}
+                      className="keyboard-btn number"
+                    >
+                      {num}
+                    </button>
+                  ))}
                   <button
                     onClick={() => handleKeyboardClick("clear")}
                     className="keyboard-btn clear"
                   >
-                    XÓA HẾT
+                    C
                   </button>
                   <button
-                    onClick={() => handleKeyboardClick("space")}
-                    className="keyboard-btn space"
+                    onClick={() => handleKeyboardClick("0")}
+                    className="keyboard-btn number"
                   >
-                    SPACE
+                    0
                   </button>
                   <button
                     onClick={() => handleKeyboardClick("backspace")}
@@ -1069,46 +1138,46 @@ const CafePOS = () => {
                     ⌫
                   </button>
                 </div>
-              </div>
-            ) : (
-              // Bàn phím số
-              <div className="keyboard-grid">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                  <button
-                    key={num}
-                    onClick={() => handleKeyboardClick(num.toString())}
-                    className="keyboard-btn number"
-                  >
-                    {num}
-                  </button>
-                ))}
-                <button
-                  onClick={() => handleKeyboardClick("clear")}
-                  className="keyboard-btn clear"
-                >
-                  C
-                </button>
-                <button
-                  onClick={() => handleKeyboardClick("0")}
-                  className="keyboard-btn number"
-                >
-                  0
-                </button>
-                <button
-                  onClick={() => handleKeyboardClick("backspace")}
-                  className="keyboard-btn backspace"
-                >
-                  ⌫
-                </button>
+              )}
+
+              <button onClick={handleKeyboardClose} className="keyboard-done">
+                ✓ Xong
+              </button>
+            </div>
+
+            {/* Panel gợi ý món - chỉ hiện khi search */}
+            {activeInput === "search" && searchSuggestions.length > 0 && (
+              <div className="suggestions-panel">
+                <div className="suggestions-header">
+                  <h3 className="suggestions-title">
+                    Gợi ý món ({searchSuggestions.length})
+                  </h3>
+                </div>
+                <div className="suggestions-list">
+                  {searchSuggestions.map((item, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => handleSelectSuggestion(item)}
+                      className="suggestion-item"
+                    >
+                      <div className="suggestion-name">{item.name}</div>
+                      <div className="suggestion-price">
+                        {item.maxPrice
+                          ? `${formatCurrency(item.price)} - ${formatCurrency(
+                              item.maxPrice
+                            )}`
+                          : formatCurrency(item.price)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-
-            <button onClick={handleKeyboardClose} className="keyboard-done">
-              ✓ Xong
-            </button>
           </div>
+          )
         </div>
       )}
+      ;
     </div>
   );
 };
