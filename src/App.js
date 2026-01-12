@@ -351,7 +351,7 @@ const CafePOS = () => {
         <title>Phiếu Bán Hàng</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: 'Courier New', monospace; padding: 30px; max-width: 450px; margin: 0 auto; font-size: 12px; }
+          body { font-family: 'Courier New', monospace; padding: 10px; max-width: 450px; margin: 0 auto; font-size: 12px; }
           .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 12px; }
           .title { font-size: 21px; font-weight: bold; margin-bottom: 5px; }
           .subtitle { font-size: 15px; margin: 5px 0; }
@@ -380,7 +380,7 @@ const CafePOS = () => {
           .footer { text-align: center; margin-top: 15px; border-top: 2px dashed #000; padding-top: 10px; font-size: 12px; page-break-inside: avoid; }
           .wifi-info { margin-top: 10px; text-align: center; font-weight: bold; font-size: 13px; }
           @media print { 
-            body { padding: 5px; max-width: 300px; }
+            body { padding:1.5px ; max-width: 300px; }
             @page { margin: 5mm; size: 80mm auto; }
             .item { page-break-inside: avoid; }
             .header { page-break-after: avoid; }
