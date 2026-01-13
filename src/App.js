@@ -358,13 +358,13 @@ const CafePOS = () => {
           .datetime { font-size: 12px; margin-top: 5px; color: #000; font-weight: bold; }
           .items { margin: 12px 0; }
           .item-header-row { display: flex; justify-content: space-between; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; font-size: 10px; }
-          .item-header-row span:nth-child(1) { flex: 1; max-width: 70%; }
+          .item-header-row span:nth-child(1) { flex: 1; max-width: 50%; }
           .item-header-row span:nth-child(2) { min-width: 5px; text-align: center; }
           .item-header-row span:nth-child(3) { min-width: 50px; text-align: right; }
           .item-header-row span:nth-child(4) { min-width: 70px; text-align: right; }
           .item { margin: 8px 0; page-break-inside: avoid; }
-          .item-row { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 3px; align-items: flex-start; font-size: 9.8px; }
-          .item-row .item-name { flex: 1; max-width: 70%; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; letter-spacing:-1px}
+          .item-row { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 3px; align-items: flex-start; font-size: 12px; }
+          .item-row .item-name { flex: 1; max-width: 50%; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; letter-spacing:-1px}
           .item-row .item-qty { min-width: 5px; text-align: center; }
           .item-row .item-unit-price { min-width: 50px; text-align: right; }
           .item-row .item-price { min-width: 70px; text-align: right; }
@@ -380,8 +380,8 @@ const CafePOS = () => {
           .footer { text-align: center; margin-top: 15px; border-top: 2px dashed #000; padding-top: 10px; font-size: 12px; page-break-inside: avoid; }
           .wifi-info { margin-top: 10px; text-align: center; font-weight: bold; font-size: 13px; }
           @media print { 
-            body {  padding:0;max-width: 350px; }
-            @page {  margin:0.5rem;size: 80mm auto; }
+            body {  padding:1;max-width: 350px; }
+            @page {  margin:1rem;size: 80mm auto; }
             .item { page-break-inside: avoid; }
             .header { page-break-after: avoid; }
             .total-section { page-break-inside: avoid; }
