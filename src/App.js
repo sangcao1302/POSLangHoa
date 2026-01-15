@@ -23,7 +23,7 @@ const removeVietnameseTones = (str) => {
 const CafePOS = () => {
   const menuData = {
     Cafe: [
-      { name: "Cafe đen ", price: 25000, hasTemp: true },
+      { name: "Cafe đen ", price: 25000, hasTemp: true, hasNoSugar: true },
       { name: "Cafe sữa", price: 27000, hasTemp: true, hasCoffeeOptions: true },
       { name: "Bạc xỉu", price: 28000, hasTemp: true, hasCoffeeOptions: true },
     ],
@@ -67,6 +67,30 @@ const CafePOS = () => {
       },
       {
         name: "Trà sữa matcha",
+        price: 30000,
+        maxPrice: 35000,
+        hasPriceOptions: true,
+      },
+      {
+        name: "Lục trà sữa dâu",
+        price: 30000,
+        maxPrice: 35000,
+        hasPriceOptions: true,
+      },
+      {
+        name: "Lục trà sữa socola",
+        price: 30000,
+        maxPrice: 35000,
+        hasPriceOptions: true,
+      },
+      {
+        name: "Lục trà sữa khoai môn",
+        price: 30000,
+        maxPrice: 35000,
+        hasPriceOptions: true,
+      },
+      {
+        name: "Trà sữa trân châu đường đen",
         price: 30000,
         maxPrice: 35000,
         hasPriceOptions: true,
@@ -117,6 +141,7 @@ const CafePOS = () => {
   const [customerPaid, setCustomerPaid] = useState("");
   const [displayPaid, setDisplayPaid] = useState("");
   const [tableNumber, setTableNumber] = useState("");
+  const [tableLocation, setTableLocation] = useState(""); // "phía trước", "phía sau", "võng trong nhà", "võng ngoài trời"
   const [surcharge, setSurcharge] = useState(0); // Phụ thu
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -127,6 +152,7 @@ const CafePOS = () => {
     isHot: false,
     lessSweet: false,
     lessIce: false,
+    noSweet: false,
     priceOption: "base", // "base" hoặc "max"
     coffeeLevel: "normal", // "more-milk", "less-milk", "more-coffee", "less-coffee", "normal"
   });
@@ -156,6 +182,7 @@ const CafePOS = () => {
       lessIce: false,
       priceOption: "base",
       coffeeLevel: "normal",
+      noSweet: false,
     });
     setShowOptionsModal(true);
   };
@@ -199,6 +226,7 @@ const CafePOS = () => {
     setCustomerPaid("");
     setDisplayPaid("");
     setTableNumber("");
+    setTableLocation("");
     setSurcharge(0);
   };
 
@@ -317,12 +345,18 @@ const CafePOS = () => {
     }
     if (item.options?.lessSweet) opts.push("Ít ngọt");
     if (item.options?.lessIce) opts.push("Ít đá");
+    if (item.options?.noSweet) opts.push("Không đường");
     return opts.length > 0 ? ` (${opts.join(", ")})` : "";
   };
 
   const printReceipt = () => {
-    if (!tableNumber || !customerPaid || parseFloat(customerPaid) <= 0) {
-      alert("Vui lòng nhập đầy đủ số bàn và tiền khách đưa!");
+    if (
+      !tableNumber ||
+      !tableLocation ||
+      !customerPaid ||
+      parseFloat(customerPaid) <= 0
+    ) {
+      alert("Vui lòng nhập số bàn, chọn vị trí và nhập tiền khách đưa!");
       return;
     }
 
@@ -341,7 +375,7 @@ const CafePOS = () => {
     const savedSurcharge = surcharge;
     const savedChange = parseFloat(savedPaid || 0) - savedTotal;
     const savedDate = new Date().toLocaleString("vi-VN");
-    const savedTable = tableNumber;
+    const savedTable = `Bàn số ${tableNumber} ${tableLocation}`;
 
     let receiptHTML = `
       <!DOCTYPE html>
@@ -393,7 +427,7 @@ const CafePOS = () => {
         <div class="header">
           <div class="title">CAFE LÀNG HOA</div>
           <div class="subtitle">PHIẾU BÁN HÀNG</div>
-          <div class="datetime">Bàn: ${savedTable} - ${savedDate}</div>
+          <div class="datetime"> ${savedTable} - ${savedDate}</div>
         </div>
         
         <div class="items">
@@ -425,6 +459,7 @@ const CafePOS = () => {
       }
       if (item.options?.lessSweet) opts.push("Ít ngọt");
       if (item.options?.lessIce) opts.push("Ít đá");
+      if (item.options?.noSweet) opts.push("Không đường");
       const optionsText = opts.length > 0 ? opts.join(", ") : "";
 
       receiptHTML += `
@@ -762,6 +797,54 @@ const CafePOS = () => {
                         </div>
 
                         <div className="payment-input-group">
+                          <label className="payment-label">Vị trí bàn *</label>
+                          <div className="location-buttons">
+                            <button
+                              type="button"
+                              onClick={() => setTableLocation("phía trước")}
+                              className={`location-btn ${
+                                tableLocation === "phía trước" ? "active" : ""
+                              }`}
+                            >
+                              📍 Phía trước
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setTableLocation("phía sau")}
+                              className={`location-btn ${
+                                tableLocation === "phía sau" ? "active" : ""
+                              }`}
+                            >
+                              📍 Phía sau
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setTableLocation("võng trong nhà")}
+                              className={`location-btn ${
+                                tableLocation === "võng trong nhà"
+                                  ? "active"
+                                  : ""
+                              }`}
+                            >
+                              🏠 Võng trong nhà
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setTableLocation("võng ngoài trời")
+                              }
+                              className={`location-btn ${
+                                tableLocation === "võng ngoài trời"
+                                  ? "active"
+                                  : ""
+                              }`}
+                            >
+                              🌳 Võng ngoài trời
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="payment-input-group">
                           <label className="payment-label">
                             Tiền khách đưa *
                           </label>
@@ -813,6 +896,7 @@ const CafePOS = () => {
                         onClick={printReceipt}
                         disabled={
                           !tableNumber ||
+                          !tableLocation ||
                           !customerPaid ||
                           parseFloat(customerPaid) < total
                         }
@@ -823,11 +907,12 @@ const CafePOS = () => {
                       </button>
 
                       {(!tableNumber ||
+                        !tableLocation ||
                         !customerPaid ||
                         parseFloat(customerPaid) < total) && (
                         <div className="warning-message">
-                          {!tableNumber || !customerPaid
-                            ? "⚠️ Vui lòng nhập đầy đủ số bàn và tiền khách đưa"
+                          {!tableNumber || !tableLocation || !customerPaid
+                            ? "⚠️ Vui lòng nhập số bàn, chọn vị trí và nhập tiền khách đưa"
                             : "⚠️ Tiền khách đưa phải ≥ tổng tiền"}
                         </div>
                       )}
@@ -1024,6 +1109,22 @@ const CafePOS = () => {
                     />
                     <span className="checkbox-text">🧊 Ít đá</span>
                   </label>
+                  {selectedItem.hasNoSugar && (
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={tempOptions.noSweet}
+                        onChange={(e) =>
+                          setTempOptions({
+                            ...tempOptions,
+                            noSweet: e.target.checked,
+                          })
+                        }
+                        className="checkbox-input"
+                      />
+                      <span className="checkbox-text">🚫 Không đường</span>
+                    </label>
+                  )}
                 </div>
               </div>
             </div>

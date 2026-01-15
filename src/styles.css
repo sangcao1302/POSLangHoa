@@ -538,6 +538,41 @@
   font-weight: normal;
 }
 
+/* Location Buttons */
+.location-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.location-btn {
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.location-btn:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.location-btn.active {
+  border-color: #2563eb;
+  background: linear-gradient(to right, #2563eb, #4f46e5);
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
 /* Tiền thối / Còn thiếu */
 .change-display {
   padding: 1rem;
@@ -1100,11 +1135,11 @@
   .menu-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .tabs-navigation {
     flex-direction: column;
   }
-  
+
   .tab-btn {
     max-width: 100%;
   }
