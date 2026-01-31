@@ -23,8 +23,15 @@ const removeVietnameseTones = (str) => {
 const CafePOS = () => {
   const menuData = {
     Cafe: [
-      { name: "Cafe đen ", price: 25000, hasTemp: true, hasNoSugar: true },
+      { name: "Cafe đá ", price: 25000, hasTemp: true, hasNoSugar: true },
+      { name: "Cafe phin đen ", price: 25000, hasTemp: true, hasNoSugar: true },
       { name: "Cafe sữa", price: 27000, hasTemp: true, hasCoffeeOptions: true },
+      {
+        name: "Cafe phin sữa",
+        price: 27000,
+        hasTemp: true,
+        hasCoffeeOptions: true,
+      },
       { name: "Bạc xỉu", price: 28000, hasTemp: true, hasCoffeeOptions: true },
     ],
     "Đặc Biệt": [
@@ -43,6 +50,7 @@ const CafePOS = () => {
       { name: "Xí muội mơ", price: 25000 },
       { name: "Tắc xí muội", price: 25000 },
       { name: "Đá me dẻo", price: 25000 },
+      { name: "Cam ép", price: 25000 },
     ],
     Yaourt: [
       { name: "Yaourt đá", price: 25000 },
